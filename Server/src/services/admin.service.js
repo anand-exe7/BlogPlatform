@@ -1,29 +1,32 @@
-import { PrismaClient } from "@prisma/client";
-import { sendMail } from "../utils/mail.js";
-const prisma = new PrismaClient();
+const express = require('express');
+require('dotenv').config();
 
-export async function getPendingUsers() {
-  return prisma.user.findMany({ where: { status: "pending" }, select: { id: true, name: true, email: true, ref_code: true } });
-}
+const app = express();
 
-export async function approveUser(id) {
-  const user = await prisma.user.update({ where: { id }, data: { status: "approved" } });
-  // TODO: send activation email (link to set-password)
-  await sendMail(user.email, "Account Approved", `Your account is approved. Use ref code ${user.ref_code} to set password.`);
-  return true;
-}
 
-export async function getPendingBlogs() {
-  return prisma.blog.findMany({ where: { status: "pending_review" }, include: { author: true } });
-}
+app.use(express.json());
 
-export async function approveBlog(id) {
-  await prisma.blog.update({ where: { id }, data: { status: "published" } });
-  return true;
-}
+// Import error handler middleware
+const { errorHandler } = require('./middleware');
 
-export async function rejectBlog(id, reason) {
-  await prisma.blog.update({ where: { id }, data: { status: "rejected" } });
-  // optionally store reason in a separate table or notify author
-  return true;
-}
+// Import routes
+const adminRoutes = require('./routes');
+
+// Mount routes
+app.use('/api/admin', adminRoutes);
+
+// Apply error handler
+app.use(errorHandler);
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Admin Dashboard API running on port ${PORT}`);
+});
+
+module.exports = app;
