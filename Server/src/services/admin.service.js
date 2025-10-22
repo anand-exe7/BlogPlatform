@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const app = express();
 
-
+// Body parser middleware
 app.use(express.json());
 
 // Import error handler middleware
