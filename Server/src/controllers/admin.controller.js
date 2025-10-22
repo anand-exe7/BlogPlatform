@@ -1,6 +1,6 @@
-// USER MANAGEMENT CONTROLLERS
+// ADMIN CONTROLLERS - USER MANAGEMENT
 
-// List pending users
+// GET /api/admin/users/pending - List pending users
 const getPendingUsers = async (req, res, next) => {
   try {
     const result = await pool.query(
@@ -21,7 +21,7 @@ const getPendingUsers = async (req, res, next) => {
   }
 };
 
-// Approve user
+// PATCH /api/admin/users/:id/approve - Approve user
 const approveUser = async (req, res, next) => {
   const { id } = req.params;
   const client = await pool.connect();
@@ -73,10 +73,10 @@ const approveUser = async (req, res, next) => {
   }
 };
 
-// BLOG MANAGEMENT CONTROLLERS
+// ADMIN CONTROLLERS - BLOG MANAGEMENT
 
-// Get all blogs (with optional status filter)
-const getAllBlogs = async (req, res, next) => {
+// GET /api/admin/blogs - Get all blogs with optional status filter
+const getBlogs = async (req, res, next) => {
   try {
     const { status } = req.query;
     
@@ -109,7 +109,7 @@ const getAllBlogs = async (req, res, next) => {
   }
 };
 
-// Approve and publish blog
+// PATCH /api/admin/blogs/:id/approve - Approve and publish blog
 const approveBlog = async (req, res, next) => {
   const { id } = req.params;
   const client = await pool.connect();
@@ -169,7 +169,7 @@ const approveBlog = async (req, res, next) => {
   }
 };
 
-// Reject blog with reason
+// PATCH /api/admin/blogs/:id/reject - Reject blog with reason
 const rejectBlog = async (req, res, next) => {
   const { id } = req.params;
   const { reason } = req.body;
@@ -242,4 +242,13 @@ const rejectBlog = async (req, res, next) => {
   } finally {
     client.release();
   }
+};
+
+// Export controllers
+module.exports = {
+  getPendingUsers,
+  approveUser,
+  getBlogs,
+  approveBlog,
+  rejectBlog
 };
