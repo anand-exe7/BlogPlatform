@@ -3,6 +3,7 @@ generator client {
 }
 
 datasource db {
+<<<<<<< HEAD
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
@@ -24,6 +25,25 @@ model User {
   created_at             DateTime  @default(now())
   updated_at             DateTime  @updatedAt
   blogs                  Blog[]
+=======
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  reg_no        String
+  year          String
+  domain        String
+  ref_code      String   @unique
+  status        String   @default("pending") // pending | approved | rejected
+  password_hash String?
+  role          String   @default("member")   // member | admin
+  created_at    DateTime @default(now())
+  blogs         Blog[]
+>>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
 }
 
 model Blog {

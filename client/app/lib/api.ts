@@ -5,7 +5,11 @@ import axios, {
 } from 'axios';
 
 const API_BASE_URL =
+<<<<<<< HEAD
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+=======
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+>>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
+<<<<<<< HEAD
 /**
  * Authentication middleware
  * Validates JWT from Authorization header (Bearer token) or HttpOnly cookie
@@ -24,12 +25,20 @@ export function authenticate(req, res, next) {
   if (!token) {
     return res.status(401).json({ error: "Authentication required" });
   }
+=======
+export function authenticate(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: "Missing Authorization header" });
+  const token = authHeader.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "Invalid Authorization header" });
+>>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     req.user = payload; // { id, role, email }
     next();
   } catch (err) {
+<<<<<<< HEAD
     if (err.name === 'TokenExpiredError') {
       return res.status(401).json({ error: "Token expired" });
     }
@@ -62,3 +71,8 @@ export function requireRole(allowedRoles) {
     next();
   };
 }
+=======
+    return res.status(401).json({ error: "Invalid token" });
+  }
+}
+>>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b

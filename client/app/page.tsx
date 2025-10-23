@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import Link from "next/link";
 
 export default function HomePage() {
@@ -60,6 +61,13 @@ export default function HomePage() {
           </p>
         </div>
       </div>
+=======
+export default function HomePage() {
+  return (
+    <div>
+      <h1>Welcome to the Simple Club Blog</h1>
+      <p>This is the homepage of the blog platform.</p>
+>>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
     </div>
   );
 }

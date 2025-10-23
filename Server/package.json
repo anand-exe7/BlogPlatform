@@ -8,17 +8,30 @@
     "prisma": "prisma"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@prisma/client": "^6.17.1",
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.6",
+=======
+>>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
+<<<<<<< HEAD
     "nodemailer": "^7.0.9"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",
     "prisma": "^6.17.1"
+=======
+    "prisma": "^5.0.0",
+    "@prisma/client": "^5.0.0",
+    "bcrypt": "^5.1.0",
+    "nodemailer": "^6.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+>>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
   }
 }
