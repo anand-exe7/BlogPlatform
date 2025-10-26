@@ -1,35 +1,44 @@
+
+// Prisma Schema for Admin Dashboard API
+
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql"   // or "mysql" / "sqlite" depending on your setup
   url      = env("DATABASE_URL")
 }
 
+// USER MODEL
 model User {
-  id            String   @id @default(uuid())
-  name          String
-  email         String   @unique
-  reg_no        String
-  year          String
-  domain        String
-  ref_code      String   @unique
-  status        String   @default("pending") // pending | approved | rejected
-  password_hash String?
-  role          String   @default("member")   // member | admin
-  created_at    DateTime @default(now())
-  blogs         Blog[]
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  password    String
+  reg_no      String
+  year        String?
+  domain      String?
+  ref_code    String   @unique
+  status      String   @default("pending")  // pending | approved | rejected
+  role        String   @default("user")     // user | admin
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  blogs       Blog[]   @relation("UserBlogs")
 }
 
+// BLOG MODEL
 model Blog {
   id          String   @id @default(uuid())
   title       String
   content     String
-  links       String?
-  status      String   @default("draft") // draft | pending_review | published | rejected
-  author_id   String
-  author      User     @relation(fields: [author_id], references: [id])
+  status      String   @default("pending_review") // pending_review | published | rejected
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
+
+  author_id   String
+  author      User     @relation("UserBlogs", fields: [author_id], references: [id])
 }
+
