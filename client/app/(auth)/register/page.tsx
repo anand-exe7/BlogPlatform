@@ -12,7 +12,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
 =======
 import { useState } from "react";
-import axios from "axios";
+import Link from "next/link";
 
 type RegisterPayload = {
   name: string;
@@ -26,8 +26,6 @@ export default function RegisterPage() {
   const [payload, setPayload] = useState<RegisterPayload>({
 >>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
     name: "",
-    email: "",
-    reg_no: "",
     year: "",
 <<<<<<< HEAD
     domain: "",
@@ -205,51 +203,107 @@ export default function RegisterPage() {
 =======
     domain: ""
   });
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
     try {
-      const r = await axios.post<{ user: { ref_code: string } }>("/api/auth/register", payload);
-      alert(`Registered. Ref code: ${r.data.user.ref_code}`);
-    } catch (err: any) {
-      alert(err.response?.data?.error || err.message);
+      console.log("Form data:", form);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setMessage("Registration successful! Waiting for admin approval...");
+      
+      setTimeout(() => {
+        window.location.href = "/pending";
+      }, 2000);
+    } catch (error) {
+      setMessage("Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   return (
-    <div>
-      <h1>Register</h1>
-      <form onSubmit={submit}>
+    <div className="flex items-center justify-center min-h-screen bg-black p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-yellow-400 shadow-2xl rounded-2xl p-8 w-full max-w-md space-y-4"
+      >
+        {/* Logo */}
+<div className="flex justify-center mb-6">
+  <img 
+    src="/logo.png" 
+    alt="CK Club Logo" 
+    className="w-24 h-24 object-contain"
+  />
+</div>
+
+        <h1 className="text-3xl font-bold text-center text-black mb-2">
+          Sign Up
+        </h1>
+        <p className="text-gray-800 text-center mb-4 font-medium">Join our club today</p>
+
         <input
-          placeholder="name"
-          value={payload.name}
-          onChange={(e) => setPayload({ ...payload, name: e.target.value })}
+          type="text"
+          name="name"
+          placeholder="Full Name"
+          className="w-full bg-white border-3 border-black rounded-lg p-3 text-black placeholder-gray-600 focus:ring-4 focus:ring-black outline-none font-medium"
           required
+          value={form.name}
+          onChange={handleChange}
+          disabled={loading}
         />
+
         <input
-          placeholder="email"
           type="email"
-          value={payload.email}
-          onChange={(e) => setPayload({ ...payload, email: e.target.value })}
+          name="email"
+          placeholder="Email"
+          className="w-full bg-white border-3 border-black rounded-lg p-3 text-black placeholder-gray-600 focus:ring-4 focus:ring-black outline-none font-medium"
           required
+          value={form.email}
+          onChange={handleChange}
+          disabled={loading}
         />
+
         <input
-          placeholder="reg_no"
-          value={payload.reg_no}
-          onChange={(e) => setPayload({ ...payload, reg_no: e.target.value })}
+          type="text"
+          name="year"
+          placeholder="Year (e.g., 1st, 2nd, 3rd, 4th)"
+          className="w-full bg-white border-3 border-black rounded-lg p-3 text-black placeholder-gray-600 focus:ring-4 focus:ring-black outline-none font-medium"
           required
+          value={form.year}
+          onChange={handleChange}
+          disabled={loading}
         />
+
         <input
-          placeholder="year"
-          value={payload.year}
-          onChange={(e) => setPayload({ ...payload, year: e.target.value })}
+          type="text"
+          name="domain"
+          placeholder="Domain (e.g., Computer Science)"
+          className="w-full bg-white border-3 border-black rounded-lg p-3 text-black placeholder-gray-600 focus:ring-4 focus:ring-black outline-none font-medium"
           required
+          value={form.domain}
+          onChange={handleChange}
+          disabled={loading}
         />
+
         <input
-          placeholder="domain"
-          value={payload.domain}
-          onChange={(e) => setPayload({ ...payload, domain: e.target.value })}
+          type="text"
+          name="reg_no"
+          placeholder="Registration Number"
+          className="w-full bg-white border-3 border-black rounded-lg p-3 text-black placeholder-gray-600 focus:ring-4 focus:ring-black outline-none font-medium"
           required
+          value={form.reg_no}
+          onChange={handleChange}
+          disabled={loading}
         />
         <button type="submit">Register</button>
 >>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b

@@ -110,22 +110,34 @@ export default function LoginPage() {
       </div>
 =======
 import { useState } from "react";
-import axios from "axios";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [formData, setFormData] = useState<{ email: string; password: string }>({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
+  };
+
+  const handleLogin = async () => {
+    setLoading(true);
+    setError("");
+
     try {
-      const res = await axios.post<{ token: string }>("/api/auth/login", { email, password });
-      console.log("token:", res.data.token);
-      alert("Logged in — token printed in console");
+      console.log("Login:", formData);
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (err: any) {
-      alert(err.response?.data?.error || err.message);
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div>
