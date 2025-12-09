@@ -1,35 +1,15 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-model User {
-  id            String   @id @default(uuid())
-  name          String
-  email         String   @unique
-  reg_no        String
-  year          String
-  domain        String
-  ref_code      String   @unique
-  status        String   @default("pending") // pending | approved | rejected
-  password_hash String?
-  role          String   @default("member")   // member | admin
-  created_at    DateTime @default(now())
-  blogs         Blog[]
-}
-
-model Blog {
-  id          String   @id @default(uuid())
-  title       String
-  content     String
-  links       String?
-  status      String   @default("draft") // draft | pending_review | published | rejected
-  author_id   String
-  author      User     @relation(fields: [author_id], references: [id])
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
 }
