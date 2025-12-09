@@ -84,9 +84,7 @@ Club Blog Platform Team
 import { sendMail } from "../utils/mail.js";
 const prisma = new PrismaClient();
 
-export async function getPendingUsers() {
-  return prisma.user.findMany({ where: { status: "pending" }, select: { id: true, name: true, email: true, ref_code: true } });
-}
+const app = express();
 
 export async function approveUser(id) {
   const user = await prisma.user.update({ where: { id }, data: { status: "approved" } });
@@ -96,17 +94,27 @@ export async function approveUser(id) {
 >>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
 }
 
-export async function getPendingBlogs() {
-  return prisma.blog.findMany({ where: { status: "pending_review" }, include: { author: true } });
-}
+// Import error handler middleware
+const { errorHandler } = require('./middleware');
 
-export async function approveBlog(id) {
-  await prisma.blog.update({ where: { id }, data: { status: "published" } });
-  return true;
-}
+// Import routes
+const adminRoutes = require('./routes');
 
-export async function rejectBlog(id, reason) {
-  await prisma.blog.update({ where: { id }, data: { status: "rejected" } });
-  // optionally store reason in a separate table or notify author
-  return true;
-}
+// Mount routes
+app.use('/api/admin', adminRoutes);
+
+// Apply error handler
+app.use(errorHandler);
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Admin Dashboard API running on port ${PORT}`);
+});
+
+module.exports = app;

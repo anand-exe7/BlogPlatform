@@ -16,6 +16,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// USER MODEL
 model User {
   id                     String    @id @default(uuid())
   name                   String
@@ -36,3 +37,4 @@ model User {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+

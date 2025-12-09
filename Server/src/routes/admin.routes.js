@@ -1,19 +1,55 @@
-import express from "express";
-import * as adminController from "../controllers/admin.controller.js";
-import { authenticate } from "../middleware/auth.js";
-import { ensureAdmin } from "../middleware/role.js";
-
+const express = require('express');
 const router = express.Router();
 
-// admin-only routes
-router.use(authenticate);
-router.use(ensureAdmin);
+// Import middleware (assuming these are imported from middleware file)
+const { authenticateToken, authorizeRole } = require('./middleware');
 
-router.get("/users/pending", adminController.listPendingUsers);       // GET /api/admin/users/pending
-router.patch("/users/:id/approve", adminController.approveUser);      // PATCH /api/admin/users/:id/approve
+// Import controllers (assuming these are imported from controllers file)
+const {
+  getPendingUsers,
+  approveUser,
+  getBlogs,
+  approveBlog,
+  rejectBlog
+} = require('./controllers');
 
-router.get("/blogs", adminController.listPendingBlogs);               // GET /api/admin/blogs
-router.patch("/blogs/:id/approve", adminController.approveBlog);      // PATCH /api/admin/blogs/:id/approve
-router.patch("/blogs/:id/reject", adminController.rejectBlog);        // PATCH /api/admin/blogs/:id/reject
+// USER MANAGEMENT ROUTES
 
-export default router;
+// GET /api/admin/users/pending - List pending users
+router.get('/users/pending', 
+  authenticateToken, 
+  authorizeRole('admin'), 
+  getPendingUsers
+);
+
+// PATCH /api/admin/users/:id/approve - Approve user
+router.patch('/users/:id/approve', 
+  authenticateToken, 
+  authorizeRole('admin'), 
+  approveUser
+);
+
+// BLOG MANAGEMENT ROUTES
+
+// GET /api/admin/blogs - Get all blogs with optional status filter
+router.get('/blogs', 
+  authenticateToken, 
+  authorizeRole('admin'), 
+  getBlogs
+);
+
+// PATCH /api/admin/blogs/:id/approve - Approve and publish blog
+router.patch('/blogs/:id/approve', 
+  authenticateToken, 
+  authorizeRole('admin'), 
+  approveBlog
+);
+
+// PATCH /api/admin/blogs/:id/reject - Reject blog with reason
+router.patch('/blogs/:id/reject', 
+  authenticateToken, 
+  authorizeRole('admin'), 
+  rejectBlog
+);
+
+module.exports = router;
