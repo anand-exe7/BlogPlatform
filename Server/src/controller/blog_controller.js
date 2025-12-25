@@ -1,5 +1,4 @@
-import { BlogService } from "../services/blog_services";
-
+import * as BlogService from "../services/blogs.service.js";
 
 const BlogController = {
 
@@ -63,7 +62,7 @@ const BlogController = {
         });
     }
   
-  };
-  
-  module.exports = BlogController;
+};
+
+export default BlogController;
   
