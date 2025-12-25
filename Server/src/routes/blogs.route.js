@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { createBlog, deleteBlog, editBlog, getblogs, getAllBlogs, getMyBlogs, submitBlog } from "../controller/blogs.controller.js";
-import { authenticateToken, checkBlogOwnership } from "../middleware/auth.js";
+import { authenticate } from "../middleware/auth.js";
 
 const blogsRouter = Router();
 
@@ -9,14 +9,14 @@ blogsRouter.get('/', getAllBlogs);
 
 blogsRouter.get('/:id', getblogs);
 
-blogsRouter.get('/my/blogs', authenticateToken, getMyBlogs);
+blogsRouter.get('/my/blogs', authenticate, getMyBlogs);
 
-blogsRouter.post('/', authenticateToken, createBlog);
+blogsRouter.post('/', authenticate, createBlog);
 
-blogsRouter.patch('/:id', authenticateToken, checkBlogOwnership, editBlog);
+blogsRouter.patch('/:id', authenticate, editBlog);
 
-blogsRouter.delete('/:id', authenticateToken, checkBlogOwnership, deleteBlog);
+blogsRouter.delete('/:id', authenticate, deleteBlog);
 
-blogsRouter.post('/:id/submit', authenticateToken, checkBlogOwnership, submitBlog);
+blogsRouter.post('/:id/submit', authenticate, submitBlog);
 
 export default blogsRouter
