@@ -19,6 +19,8 @@ app.use(cookieParser()); // Parse cookies
 
 // health
 app.get("/", (req, res) => res.json({ ok: true, message: "Backend API Working ✅" }));
+// lightweight health endpoint used by E2E tests
+app.get('/health', (req, res) => res.json({ ok: true, database: 'unknown' }));
 
 // mount api routes like /api/auth, /api/blogs, /api/admin
 registerRoutes(app);

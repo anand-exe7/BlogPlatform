@@ -65,10 +65,12 @@ export async function login(req, res, next) {
     const result = await authService.login(email, password);
 
     if (process.env.USE_COOKIES === 'true' && result && result.token) {
+      const cookieSecure = process.env.COOKIE_SECURE === 'true' ? true : (process.env.NODE_ENV === 'production');
+      const cookieSameSite = process.env.COOKIE_SAME_SITE || 'lax';
       res.cookie('auth_token', result.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: cookieSecure,
+        sameSite: cookieSameSite,
         maxAge: 7 * 24 * 60 * 60 * 1000
       });
     }
@@ -91,8 +93,27 @@ export async function getCurrentUser(req, res, next) {
 
 export async function logout(req, res, next) {
   try {
+    // Revoke token server-side if present (helps E2E and logout invalidation)
+    const tokenFromCookie = req.cookies?.auth_token;
+    const authHeader = req.headers?.authorization;
+    const tokenFromHeader = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+    const tokenToRevoke = tokenFromCookie || tokenFromHeader;
+    if (tokenToRevoke) {
+      try {
+        const { revokeJwt } = await import('../middleware/jwt.js');
+        revokeJwt(tokenToRevoke);
+      } catch (e) {
+        // non-fatal
+        console.error('Warning: failed to revoke token', e);
+      }
+    }
+
     if (process.env.USE_COOKIES === 'true') {
-      res.clearCookie('auth_token');
+      // Clear cookie using same options used when setting it so browser accepts the cleared cookie
+      const cookieSecure = process.env.COOKIE_SECURE === 'true' ? true : (process.env.NODE_ENV === 'production');
+      const cookieSameSite = process.env.COOKIE_SAME_SITE || 'lax';
+      // Explicitly set Max-Age=0 so test-suite can detect clearing
+      res.cookie('auth_token', '', { httpOnly: true, secure: cookieSecure, sameSite: cookieSameSite, maxAge: 0 });
     }
     res.json({ message: "Logged out successfully" });
   } catch (err) {
