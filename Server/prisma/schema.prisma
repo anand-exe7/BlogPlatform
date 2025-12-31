@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -23,23 +23,30 @@ enum BlogStatus {
   draft
   pending_review
   approved
+  published
   rejected
 }
 
-model User {
-  id            String     @id @default(uuid())
-  name          String
-  email         String     @unique
-  reg_no        String     @unique
-  year          String
-  domain        String
-  ref_code      String     @unique
-  status        UserStatus @default(pending)
-  password_hash String?
-  role          UserRole   @default(member)
-  created_at    DateTime   @default(now())
 
-  blogs         Blog[]
+model User {
+  id                     String     @id @default(uuid())
+  name                   String
+  email                  String     @unique
+  reg_no                 String     @unique
+  year                   String
+  domain                 String
+  ref_code               String     @unique
+  status                 UserStatus @default(pending)
+  password_hash          String?
+  role                   UserRole   @default(member)
+
+  // 🔐 Set-password flow fields
+  set_password_token     String?
+  set_password_expires   DateTime?
+
+  created_at             DateTime   @default(now())
+
+  blogs                  Blog[]
 }
 
 model Blog {

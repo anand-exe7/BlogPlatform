@@ -39,28 +39,49 @@ export async function register(payload) {
 }
 
 export async function setPassword(tokenOrRef, password) {
-  // tokenOrRef may be a one-time token (set_password_token) or a ref_code
   let user = null;
-  // try token first
-  user = await prisma.user.findUnique({ where: { set_password_token: tokenOrRef } });
+
+  // 1️⃣ Try token-based lookup (TEMP field → findFirst)
+  user = await prisma.user.findFirst({
+    where: {
+      set_password_token: tokenOrRef,
+      set_password_expires: {
+        gt: new Date(),
+      },
+    },
+  });
+
+  // 2️⃣ Fallback: ref_code lookup (PERMANENT → findUnique)
   if (!user) {
-    // try by ref_code
-    user = await prisma.user.findUnique({ where: { ref_code: tokenOrRef } });
+    user = await prisma.user.findUnique({
+      where: { ref_code: tokenOrRef },
+    });
   }
 
-  if (!user) throw new Error('Invalid token or reference code');
-
-  // if token was used, check expiry
-  if (user.set_password_token === tokenOrRef) {
-    if (!user.set_password_expires || user.set_password_expires < new Date()) throw new Error('Token expired');
+  if (!user) {
+    throw new Error("Invalid or expired token / reference code");
   }
 
-  if (user.status !== 'approved') throw new Error('User account not approved');
+  if (user.status !== "approved") {
+    throw new Error("User account not approved");
+  }
 
+  // 3️⃣ Hash password
   const hash = await bcrypt.hash(password, 12);
-  await prisma.user.update({ where: { id: user.id }, data: { password_hash: hash, set_password_token: null, set_password_expires: null } });
+
+  // 4️⃣ Update user + clear token
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      password_hash: hash,
+      set_password_token: null,
+      set_password_expires: null,
+    },
+  });
+
   return true;
 }
+
 
 export async function login(email, password) {
   const user = await prisma.user.findUnique({ where: { email } });

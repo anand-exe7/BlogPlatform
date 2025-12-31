@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
+import { isRevoked } from './jwt.js';
 
 /**
  * Authentication middleware
@@ -27,6 +28,8 @@ export function authenticate(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
+    // reject tokens that have been revoked server-side
+    if (isRevoked(token)) return res.status(401).json({ error: 'Invalid token' });
     req.user = payload; // { id, role, email }
     next();
   } catch (err) {
