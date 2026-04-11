@@ -1,49 +1,55 @@
 "use client";
-<<<<<<< HEAD
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import api from "../../lib/api";
-import toast, { Toaster } from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("registered") === "true") {
+      setSuccessMessage("Registration successful! Please wait for admin approval before logging in.");
+    }
+  }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
-      const response = await api.post("/auth/login", formData);
+      const response = await api.post<{
+        success: boolean;
+        data: { token: string; user: { id: string; name: string; role: string } };
+      }>("/auth/login", formData);
+
       const { token, user } = response.data;
 
-      // Store token and user info
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      toast.success(`Welcome back, ${user.name}!`);
-
-      // Redirect based on role
-      setTimeout(() => {
-        if (user.role === "admin") {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/member/dashboard");
-        }
-      }, 1000);
+      if (user.role === "admin") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/member/dashboard");
+      }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || "Login failed. Please try again.";
-      toast.error(errorMessage);
+      setError(err.response?.data?.error?.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -51,11 +57,21 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Toaster position="top-right" />
-      
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
         <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
         <p className="text-gray-600 mb-6">Login to your account</p>
+        
+        {successMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {successMessage}
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
         
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -102,64 +118,12 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-gray-600 mt-6">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/register" className="text-indigo-600 font-semibold hover:underline">
             Sign up
           </Link>
         </p>
       </div>
-=======
-import { useState } from "react";
-import Link from "next/link";
-
-export default function LoginPage() {
-  const [formData, setFormData] = useState<{ email: string; password: string }>({
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError("");
-  };
-
-  const handleLogin = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      console.log("Login:", formData);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (err: any) {
-      setError(err.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          placeholder="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          type="email"
-          required
-        />
-        <input
-          placeholder="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Login</button>
-      </form>
->>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
     </div>
   );
 }

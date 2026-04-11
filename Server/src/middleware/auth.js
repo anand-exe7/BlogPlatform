@@ -4,6 +4,42 @@ dotenv.config();
 import { isRevoked } from './jwt.js';
 
 /**
+ * Optional authentication middleware
+ * Validates JWT if present, but doesn't require it
+ * Attaches decoded user to req.user { id, role, email } if valid token provided
+ */
+export function optionalAuth(req, res, next) {
+  let token;
+
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  }
+  
+  if (!token && process.env.USE_COOKIES === 'true') {
+    token = req.cookies?.auth_token;
+  }
+
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (isRevoked(token)) {
+      req.user = null;
+      return next();
+    }
+    req.user = payload;
+    next();
+  } catch (err) {
+    req.user = null;
+    next();
+  }
+}
+
+/**
  * Authentication middleware
  * Validates JWT from Authorization header (Bearer token) or HttpOnly cookie
  * Attaches decoded user to req.user { id, role, email }

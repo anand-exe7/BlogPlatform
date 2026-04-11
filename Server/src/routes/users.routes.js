@@ -1,13 +1,14 @@
 import express from "express";
 import * as authController from "../controllers/auth.controller.js";
+import * as interactionController from "../controllers/interaction.controller.js";
+import { registrationLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
-// Public routes - User registration and password setup
-// POST /api/users/register - Register new user
-router.post("/register", authController.register);
-
-// POST /api/users/set-password - Set password with token after admin approval
+router.post("/register", registrationLimiter, authController.register);
 router.post("/set-password", authController.setPassword);
+router.post("/verify-email", authController.verifyEmail);
+router.post("/forgot-password", authController.requestPasswordReset);
+router.get("/:userId/stats", interactionController.getPublicUserStats);
 
 export default router;

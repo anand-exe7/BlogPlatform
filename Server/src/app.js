@@ -3,35 +3,32 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import registerRoutes from "./routes/index.routes.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
+import { generalLimiter } from "./middleware/rateLimiter.js";
+import { logger } from "./utils/logger.js";
 
 dotenv.config();
 
 const app = express();
 
-// CORS configuration
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true // Allow cookies
+  credentials: true
 }));
 
-app.use(express.json());
-app.use(cookieParser()); // Parse cookies
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// health
-app.get("/", (req, res) => res.json({ ok: true, message: "Backend API Working ✅" }));
-// lightweight health endpoint used by E2E tests
-app.get('/health', (req, res) => res.json({ ok: true, database: 'unknown' }));
+app.use(generalLimiter);
 
-// mount api routes like /api/auth, /api/blogs, /api/admin
+app.get("/", (req, res) => res.json({ ok: true, message: "Backend API Working" }));
+app.get('/health', (req, res) => res.json({ ok: true, database: 'connected' }));
+
 registerRoutes(app);
 
-// centralized 404
-app.use((req, res) => res.status(404).json({ error: "Not Found" }));
+app.use(notFoundHandler);
 
-// error handler
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(err.status || 500).json({ error: err.message || "Internal Server Error" });
-});
+app.use(errorHandler);
 
 export default app;

@@ -1,9 +1,36 @@
-<<<<<<< HEAD
 import Link from "next/link";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <Link href="/" className="text-xl font-bold text-indigo-600">
+            Club Blog Platform
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/blogs"
+              className="text-gray-600 hover:text-indigo-600 transition"
+            >
+              Read Blogs
+            </Link>
+            <Link
+              href="/login"
+              className="text-gray-600 hover:text-indigo-600 transition"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition"
+            >
+              Sign Up
+            </Link>
+          </div>
+        </div>
+      </header>
+
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-4">
@@ -15,16 +42,16 @@ export default function HomePage() {
           
           <div className="flex gap-4 justify-center">
             <Link
-              href="/register"
+              href="/blogs"
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200"
             >
-              Get Started
+              Read Blogs
             </Link>
             <Link
-              href="/login"
+              href="/register"
               className="bg-white hover:bg-gray-50 text-indigo-600 font-semibold py-3 px-8 rounded-lg border-2 border-indigo-600 transition duration-200"
             >
-              Login
+              Get Started
             </Link>
           </div>
         </div>
@@ -61,13 +88,12 @@ export default function HomePage() {
           </p>
         </div>
       </div>
-=======
-export default function HomePage() {
-  return (
-    <div>
-      <h1>Welcome to the Simple Club Blog</h1>
-      <p>This is the homepage of the blog platform.</p>
->>>>>>> 5f9e4a115489d823fb1bd7fd4a91f6fbed6c587b
+
+      <footer className="bg-white border-t mt-16">
+        <div className="max-w-7xl mx-auto px-4 py-6 text-center text-gray-600">
+          <p>© 2024 Club Blog Platform. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }

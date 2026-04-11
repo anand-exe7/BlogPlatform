@@ -9,11 +9,11 @@ export default function PendingPage() {
         <div className="mb-4 text-6xl">⏳</div>
         
         <h1 className="text-3xl font-bold mb-4 text-gray-800">
-          Awaiting Admin Approval
+          Registration Successful!
         </h1>
         
         <p className="text-gray-600 mb-6">
-          Your account is currently under review. You'll receive an email with a password setup link once your registration is approved by the admin.
+          Your account has been created and is waiting for admin approval. Once approved, you can login with your password.
         </p>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -25,11 +25,11 @@ export default function PendingPage() {
             </li>
             <li className="flex items-start">
               <span className="mr-2">2.</span>
-              <span>You receive an email with a password setup link</span>
+              <span>Once approved, login with your email and password</span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">3.</span>
-              <span>Set your password and login to access your dashboard</span>
+              <span>Start creating and submitting blogs</span>
             </li>
           </ol>
         </div>
@@ -39,7 +39,14 @@ export default function PendingPage() {
             href="/login"
             className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
           >
-            Back to Login
+            Go to Login
+          </Link>
+          
+          <Link
+            href="/blogs"
+            className="block w-full border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-3 px-4 rounded-lg transition duration-200"
+          >
+            Browse Blogs (No login required)
           </Link>
           
           <Link
