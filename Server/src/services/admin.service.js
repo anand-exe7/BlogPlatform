@@ -1,6 +1,43 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../db/db.js";
 
-const prisma = new PrismaClient();
+export async function getDashboardStats() {
+  const [totalUsers, pendingUsers, approvedUsers, totalBlogs, pendingBlogs, totalLikes, totalComments] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({ where: { status: 'pending' } }),
+    prisma.user.count({ where: { status: 'approved' } }),
+    prisma.blog.count(),
+    prisma.blog.count({ where: { status: 'pending_review' } }),
+    prisma.like.count(),
+    prisma.comment.count()
+  ]);
+
+  return {
+    totalUsers,
+    pendingUsers,
+    approvedUsers,
+    totalBlogs,
+    pendingBlogs,
+    totalLikes,
+    totalComments
+  };
+}
+
+export async function getAllUsers() {
+  return prisma.user.findMany({
+    select: { 
+      id: true, 
+      name: true, 
+      email: true, 
+      reg_no: true, 
+      year: true, 
+      domain: true, 
+      status: true, 
+      role: true, 
+      created_at: true 
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
 
 export async function getPendingUsers() {
   return prisma.user.findMany({

@@ -14,13 +14,17 @@ const transporter = nodemailer.createTransport({
   maxMessages: 100,
 });
 
-transporter.verify((error) => {
-  if (error) {
-    logger.error('Email transporter verification failed', { error: error.message });
-  } else {
-    logger.info('Email transporter connected');
-  }
-});
+try {
+  transporter.verify((error) => {
+    if (error) {
+      logger.error('Email transporter verification failed (non-fatal)', { error: error.message });
+    } else {
+      logger.info('Email transporter connected');
+    }
+  });
+} catch (err) {
+  logger.error('Email transporter initialization error (non-fatal)', { error: err.message });
+}
 
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));

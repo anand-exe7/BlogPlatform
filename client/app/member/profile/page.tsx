@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import api from "../../lib/api";
+import api from "@/lib/api";
 
 interface UserProfile {
   id: string;
@@ -73,7 +73,7 @@ export default function MemberProfile() {
   const fetchStats = async (userId: string) => {
     try {
       const res = await api.get<{ success: boolean; data: UserStats }>(`/users/${userId}/stats`);
-      setStats(res.data);
+      setStats(res.data?.data || null);
     } catch (err) {
       console.error("Failed to fetch stats:", err);
     } finally {
@@ -142,10 +142,10 @@ export default function MemberProfile() {
           <h1 className="text-2xl font-bold">My Profile</h1>
           <div className="flex items-center gap-4">
             <Link
-              href="/member/dashboard"
+              href="/"
               className="bg-white text-indigo-600 hover:bg-gray-100 px-4 py-2 rounded-lg font-medium transition"
             >
-              ← Dashboard
+              ← Home
             </Link>
             <span>Welcome, {user?.name}</span>
             <button
@@ -346,10 +346,10 @@ export default function MemberProfile() {
           <h2 className="text-xl font-bold mb-4">Quick Links</h2>
           <div className="grid md:grid-cols-3 gap-4">
             <Link
-              href="/member/dashboard"
+              href="/"
               className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 p-4 rounded-lg text-center font-medium transition"
             >
-              📝 My Blogs
+              📝 Read Feed
             </Link>
             <Link
               href="/blogs"

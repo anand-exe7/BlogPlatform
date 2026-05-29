@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../db/db.js";
 import { AppError } from "../utils/AppError.js";
-
-const prisma = new PrismaClient();
 
 export async function toggleLike(blogId, userId) {
   const blog = await prisma.blog.findUnique({ where: { id: blogId } });
@@ -49,13 +47,20 @@ export async function getBlogLikes(blogId, userId = null) {
   return { count, userLiked };
 }
 
-export async function addComment(blogId, userId, content) {
+export async function addComment(blogId, userId, content, parentId = null) {
   const blog = await prisma.blog.findUnique({ where: { id: blogId } });
   if (!blog) throw new AppError("Blog not found", 404, "NOT_FOUND");
   if (blog.status !== "published") throw new AppError("Blog not available", 400, "BAD_REQUEST");
 
+  // If parentId is provided, verify it exists and is for the same blog
+  if (parentId) {
+    const parent = await prisma.comment.findUnique({ where: { id: parentId } });
+    if (!parent) throw new AppError("Parent comment not found", 404, "NOT_FOUND");
+    if (parent.blog_id !== blogId) throw new AppError("Invalid parent comment", 400, "BAD_REQUEST");
+  }
+
   const comment = await prisma.comment.create({
-    data: { blog_id: blogId, user_id: userId, content },
+    data: { blog_id: blogId, user_id: userId, content, parent_id: parentId },
     include: {
       user: { select: { id: true, name: true } },
     },
@@ -65,10 +70,22 @@ export async function addComment(blogId, userId, content) {
 }
 
 export async function getBlogComments(blogId) {
+  // We fetch comments flattened but with parent info, 
+  // or we could fetch root comments with included replies.
+  // For 2 levels, we fetch root comments (parent_id: null) and their replies.
   return prisma.comment.findMany({
-    where: { blog_id: blogId },
+    where: { 
+      blog_id: blogId,
+      parent_id: null // Root comments
+    },
     include: {
       user: { select: { id: true, name: true } },
+      replies: {
+        include: {
+          user: { select: { id: true, name: true } }
+        },
+        orderBy: { created_at: "asc" }
+      }
     },
     orderBy: { created_at: "desc" },
   });

@@ -98,6 +98,14 @@ export function requireRole(allowedRoles) {
       });
     }
 
+    // Secure restriction to ensure ONLY the master admin can use administrative APIs
+    if (roles.includes('admin') && !req.user.is_super_admin) {
+      return res.status(403).json({ 
+        error: "Access Denied",
+        message: "This administrative area is strictly restricted to the primary system administrator."
+      });
+    }
+
     next();
   };
 }

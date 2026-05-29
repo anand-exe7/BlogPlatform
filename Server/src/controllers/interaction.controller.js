@@ -17,7 +17,7 @@ export const getComments = asyncHandler(async (req, res) => {
 
 export const addComment = asyncHandler(async (req, res) => {
   const { blogId } = req.params;
-  const { content } = req.body;
+  const { content, parentId } = req.body;
   const userId = req.user.id;
 
   if (!content || !content.trim()) {
@@ -27,7 +27,7 @@ export const addComment = asyncHandler(async (req, res) => {
     });
   }
 
-  const comment = await interactionService.addComment(blogId, userId, content);
+  const comment = await interactionService.addComment(blogId, userId, content, parentId);
   res.status(201).json({ success: true, data: { comment } });
 });
 

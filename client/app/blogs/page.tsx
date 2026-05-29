@@ -1,183 +1,92 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import api from "../lib/api";
+import { motion } from 'framer-motion';
+import { BookOpen, ArrowLeft, PenTool } from 'lucide-react';
+import Link from 'next/link';
+import { GrainOverlay, GridPattern } from '@/components/background';
+import BlogFeed from '@/components/BlogFeed';
 
-interface Blog {
-  id: string;
-  title: string;
-  content: string;
-  image?: string;
-  links?: string;
-  author: {
-    name: string;
-    email: string;
-  };
-  created_at: string;
-}
-
-interface LoggedInUser {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-export default function PublicBlogsPage() {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<LoggedInUser | null>(null);
-
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-    fetchBlogs();
-  }, []);
-
-  const fetchBlogs = async () => {
-    try {
-      const res = await api.get<{ success: boolean; data: { blogs: Blog[] } }>("/blogs/public");
-      setBlogs(res.data?.blogs || []);
-    } catch (err) {
-      console.error("Failed to fetch blogs:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-xl">Loading blogs...</div>
-      </div>
-    );
-  }
-
+export default function BlogsPage() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="text-xl font-bold text-indigo-600">
-            Club Blog Platform
+    <div className="min-h-screen bg-[#f8f7f4] font-sans text-gray-900 selection:bg-[#f5b800] selection:text-white overflow-x-hidden relative">
+      <GrainOverlay />
+      <GridPattern />
+      
+      {/* Public Top Nav */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+              <BookOpen size={20} />
+            </div>
+            <span className="font-black text-xl tracking-tighter uppercase">CodeKrafter</span>
           </Link>
           
-          {user ? (
-            <div className="flex items-center gap-4">
-              {user.role === "admin" ? (
-                <Link
-                  href="/admin/dashboard"
-                  className="text-gray-600 hover:text-indigo-600 transition font-medium"
-                >
-                  Admin Dashboard
-                </Link>
-              ) : (
-                <Link
-                  href="/member/dashboard"
-                  className="text-gray-600 hover:text-indigo-600 transition font-medium"
-                >
-                  My Dashboard
-                </Link>
-              )}
-              <Link
-                href={`/${user.role === "admin" ? "admin" : "member"}/profile`}
-                className="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-200 transition"
-              >
-                👤 {user.name}
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-red-600 transition"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Link
-                href="/login"
-                className="text-gray-600 hover:text-indigo-600 transition"
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition"
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Our Blogs</h1>
-          <p className="text-gray-600">Read the latest articles from our community members</p>
-        </div>
-
-        {blogs.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <p className="text-gray-500 text-lg">No blogs published yet.</p>
-            <p className="text-gray-500 mt-2">Check back later for new content!</p>
+          <div className="flex items-center gap-4">
+            <Link 
+              href="/login" 
+              className="px-6 py-2.5 rounded-xl font-black text-sm text-gray-500 hover:text-black transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link 
+              href="/login" 
+              className="px-6 py-2.5 bg-black text-white rounded-xl font-black text-sm shadow-xl hover:shadow-gray-200 transition-all flex items-center gap-2"
+            >
+              <PenTool size={16} /> Join Club
+            </Link>
           </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {blogs.map((blog) => (
-              <div key={blog.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
-                {blog.image && (
-                  <img
-                    src={blog.image}
-                    alt={blog.title}
-                    className="w-full h-48 object-cover"
-                  />
-                )}
-                <div className="p-6">
-                  <h2 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2">
-                    {blog.title}
-                  </h2>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">
-                      {blog.author.name}
-                    </div>
-                    <span className="text-gray-400 text-sm">
-                      {new Date(blog.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-gray-600 mb-4 line-clamp-3">
-                    {blog.content}
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">
-                      {blog.content.length > 100 ? "..." : ""}
-                    </span>
-                    <Link
-                      href={`/blogs/${blog.id}`}
-                      className="text-indigo-600 hover:text-indigo-800 font-medium transition"
-                    >
-                      Read more →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
+        </div>
+      </nav>
+
+      <main className="relative z-10 w-full flex flex-col items-center pt-32 pb-24 px-4 md:px-8">
+        <div className="w-full max-w-7xl">
+          {/* Header Intro */}
+          <div className="mb-16 md:mb-24 flex flex-col items-center text-center">
+             <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-100 mb-8"
+             >
+               <div className="w-2 h-2 rounded-full bg-[#f5b800]" />
+               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">Open Access Portal</span>
+             </motion.div>
+             
+             <motion.h1
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 0.1 }}
+               className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] text-gray-900 mb-8"
+             >
+               THE PUBLIC <br />
+               <span className="text-amber-600">STORYBOARD.</span>
+             </motion.h1>
+             
+             <motion.p
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               transition={{ delay: 0.2 }}
+               className="max-w-2xl text-xl text-gray-500 font-medium leading-relaxed"
+             >
+               Explore the collective mind of the Code Krafters community. 
+               Insights, tutorials, and stories from the bridge of the digital frontier.
+             </motion.p>
           </div>
-        )}
+
+          <BlogFeed />
+        </div>
       </main>
 
-      <footer className="bg-white border-t mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-6 text-center text-gray-600">
-          <p>© 2024 Club Blog Platform. All rights reserved.</p>
+      {/* Decorative Footer Detail */}
+      <footer className="relative z-10 py-12 border-t border-gray-100 flex flex-col items-center gap-6">
+        <div className="flex gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+          <span>Design</span>
+          <span>•</span>
+          <span>Stories</span>
+          <span>•</span>
+          <span>Code</span>
         </div>
+        <p className="text-xs font-bold text-gray-300">© 2024 CODE KRAFTERS CLUB</p>
       </footer>
     </div>
   );

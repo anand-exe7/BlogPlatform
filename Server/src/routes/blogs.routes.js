@@ -13,6 +13,7 @@ router.get("/public/:id", optionalAuth, blogsController.getPublicBlogById);
 router.use(authenticate);
 router.post("/", ensureMember, blogsController.createDraft);
 router.patch("/:id", ensureMember, blogsController.editDraft);
+router.delete("/:id", ensureMember, blogsController.deleteDraft);
 router.post("/:id/submit", ensureMember, blogsController.submitForReview);
 router.get("/my", ensureMember, blogsController.getMyBlogs);
 
