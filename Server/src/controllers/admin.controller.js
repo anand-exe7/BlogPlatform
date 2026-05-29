@@ -4,6 +4,16 @@ import * as adminService from '../services/admin.service.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { AppError } from '../utils/AppError.js';
 
+export const getDashboardStats = asyncHandler(async (req, res) => {
+  const stats = await adminService.getDashboardStats();
+  res.json({ success: true, data: stats });
+});
+
+export const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await adminService.getAllUsers();
+  res.json({ success: true, data: { count: users.length, users } });
+});
+
 export const getPendingUsers = asyncHandler(async (req, res) => {
   const users = await adminService.getPendingUsers();
   res.json({ success: true, data: { count: users.length, users } });
@@ -40,7 +50,7 @@ export const approveBlog = asyncHandler(async (req, res) => {
 
   const author = await prisma.user.findUnique({ where: { id: blog.author_id } });
   if (author) {
-    await sendMail(author.email, 'Blog Post Approved', emailTemplates.blogApproval(blog.title));
+    sendMail(author.email, 'Blog Post Approved', emailTemplates.blogApproval(blog.title));
   }
 
   res.json({ success: true, data: { message: 'Blog approved and published', blog: updated } });
@@ -65,7 +75,7 @@ export const rejectBlog = asyncHandler(async (req, res) => {
 
   const author = await prisma.user.findUnique({ where: { id: blog.author_id } });
   if (author) {
-    await sendMail(author.email, 'Blog Post Update', emailTemplates.blogRejection(blog.title, reason));
+    sendMail(author.email, 'Blog Post Update', emailTemplates.blogRejection(blog.title, reason));
   }
 
   res.json({

@@ -129,3 +129,22 @@ export const logout = asyncHandler(async (req, res) => {
     data: { message: "Logged out successfully" }
   });
 });
+
+export const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    throw new AppError('Current and new passwords are required', 400, 'VALIDATION_ERROR');
+  }
+
+  if (newPassword.length < 8) {
+    throw new AppError('New password must be at least 8 characters', 400, 'VALIDATION_ERROR');
+  }
+
+  const result = await authService.changePassword(req.user.id, currentPassword, newPassword);
+
+  res.json({
+    success: true,
+    data: result
+  });
+});

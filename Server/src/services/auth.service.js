@@ -1,10 +1,8 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../db/db.js";
 import { signJwt } from "../middleware/jwt.js";
 import { sendMail } from "../middleware/mail.js";
-
-const prisma = new PrismaClient();
 
 function generateRefCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -40,7 +38,11 @@ export async function register(payload) {
 
   const user = await prisma.user.create({
     data: {
-      ...userData,
+      name: payload.name,
+      email: payload.email,
+      reg_no: payload.reg_no,
+      year: payload.year ? String(payload.year) : '1',
+      domain: payload.domain,
       ref_code,
       status: 'pending',
       password_hash: passwordHash,
@@ -125,12 +127,12 @@ export async function login(email, password) {
     },
   });
 
-  const token = signJwt({ id: user.id, role: user.role, email: user.email });
-  return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role } };
+  const token = signJwt({ id: user.id, role: user.role, email: user.email, is_super_admin: user.is_super_admin });
+  return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role, is_super_admin: user.is_super_admin } };
 }
 
 export async function getUserById(userId) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, name: true, email: true, reg_no: true, year: true, domain: true, role: true, status: true, created_at: true } });
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, name: true, email: true, reg_no: true, year: true, domain: true, role: true, is_super_admin: true, status: true, created_at: true } });
   if (!user) throw new Error('User not found');
   return user;
 }
@@ -188,4 +190,21 @@ export async function requestPasswordReset(email) {
   await sendMail(user.email, 'Password Reset Request', emailTemplates.passwordReset(user.name, resetUrl));
 
   return { message: 'If an account exists with this email, a reset link has been sent' };
+}
+
+export async function changePassword(userId, currentPassword, newPassword) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error('User not found');
+  if (!user.password_hash) throw new Error('Password not set for this account');
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!isMatch) throw new Error('Incorrect current password');
+
+  const newHash = await bcrypt.hash(newPassword, 12);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password_hash: newHash }
+  });
+
+  return { message: 'Password updated successfully' };
 }

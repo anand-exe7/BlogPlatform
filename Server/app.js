@@ -2,8 +2,8 @@ import express, { json, urlencoded } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import { config } from 'dotenv';
-import blogsRouter from './src/routes/blogs.route.js';
-import prisma from './src/db/db.js';;
+import registerRoutes from './src/routes/index.routes.js';
+import prisma from './src/db/db.js';
 
 config();
 
@@ -15,7 +15,8 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
-app.use('/api/blogs',blogsRouter)
+// Register all routes
+registerRoutes(app);
 
 // Health check
 app.get('/health', async (req, res) => {

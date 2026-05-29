@@ -1,21 +1,23 @@
-import React, { ReactNode } from "react";
-import "./globals.css";
+import './globals.css'
+import type { Metadata } from 'next'
+import { Toaster } from 'react-hot-toast'
 
-export const metadata = {
-  title: "Club Blog Platform",
-  description: "Blog platform for club members with admin approval workflow"
-};
-
-interface RootLayoutProps {
-  children: ReactNode;
+export const metadata: Metadata = {
+  title: 'Blog Platform - Share Your Stories',
+  description: 'A modern blogging platform to share your stories with the world',
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
       <body>
+        <Toaster position="top-right" />
         {children}
       </body>
     </html>
-  );
+  )
 }

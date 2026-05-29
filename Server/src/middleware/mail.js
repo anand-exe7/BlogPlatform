@@ -3,10 +3,13 @@ import { logger } from '../utils/logger.js';
 
 export async function sendMail(to, subject, html) {
   try {
+    // We intentionally don't await this if we want fire-and-forget, 
+    // but the caller handles the await. Inside here, we catch everything.
     await sendEmail(to, subject, html);
+    logger.info('Email sent successfully', { to, subject });
   } catch (error) {
-    logger.error('Failed to send email', { to, subject, error: error.message });
-    throw new Error('Failed to send email');
+    logger.error('Failed to send email (non-fatal)', { to, subject, error: error.message });
+    // Do NOT throw here, we want the calling process to continue
   }
 }
 

@@ -1,7 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import { AppError } from "../utils/AppError.js";
-
-const prisma = new PrismaClient();
+import prisma from "../db/db.js";
 
 export async function createDraft(authorId, payload) {
   const blog = await prisma.blog.create({
@@ -12,6 +9,10 @@ export async function createDraft(authorId, payload) {
       links: payload.links || null,
       author_id: authorId,
       status: "draft"
+    },
+    include: {
+      author: { select: { id: true, name: true, email: true } },
+      _count: { select: { likes: true, comments: true } }
     }
   });
   return blog;
@@ -35,6 +36,17 @@ export async function editDraft(authorId, id, payload) {
     }
   });
   return updated;
+}
+
+export async function deleteBlog(authorId, id) {
+  const blog = await prisma.blog.findUnique({ where: { id } });
+  if (!blog) throw new AppError("Blog not found", 404, "NOT_FOUND");
+  if (blog.author_id !== authorId) throw new AppError("Not authorized", 403, "FORBIDDEN");
+
+  await prisma.blog.delete({
+    where: { id }
+  });
+  return { success: true };
 }
 
 export async function submitForReview(authorId, id) {
@@ -74,8 +86,8 @@ export async function getByAuthor(authorId) {
   });
 }
 
-export async function getPublishedBlogs() {
-  return prisma.blog.findMany({
+export async function getPublishedBlogs(userId = null) {
+  const blogs = await prisma.blog.findMany({
     where: { status: "published" },
     include: {
       author: {
@@ -94,6 +106,24 @@ export async function getPublishedBlogs() {
     },
     orderBy: { created_at: 'desc' }
   });
+
+  if (!userId) return blogs.map(b => ({ ...b, userLiked: false }));
+
+  // Efficiently check likes for all fetched blogs
+  const userLikes = await prisma.like.findMany({
+    where: {
+      user_id: userId,
+      blog_id: { in: blogs.map(b => b.id) }
+    },
+    select: { blog_id: true }
+  });
+
+  const likedBlogIds = new Set(userLikes.map(l => l.blog_id));
+
+  return blogs.map(b => ({
+    ...b,
+    userLiked: likedBlogIds.has(b.id)
+  }));
 }
 
 export async function getBlogById(id, userId = null) {

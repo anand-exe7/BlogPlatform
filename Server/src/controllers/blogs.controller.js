@@ -30,6 +30,19 @@ export async function editDraft(req, res, next) {
   }
 }
 
+export async function deleteDraft(req, res, next) {
+  try {
+    const authorId = req.user.id;
+    const { id } = req.params;
+    await blogsService.deleteBlog(authorId, id);
+    res.json({
+      success: true,
+      data: { message: "Blog deleted successfully" }
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 export async function submitForReview(req, res, next) {
   try {
     const authorId = req.user.id;
@@ -59,7 +72,8 @@ export async function getMyBlogs(req, res, next) {
 
 export async function getPublicBlogs(req, res, next) {
   try {
-    const blogs = await blogsService.getPublishedBlogs();
+    const userId = req.user?.id;
+    const blogs = await blogsService.getPublishedBlogs(userId);
     res.json({
       success: true,
       data: {
