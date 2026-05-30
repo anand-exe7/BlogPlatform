@@ -18,6 +18,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const reason = searchParams.get("reason");
 
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
@@ -39,10 +40,12 @@ function LoginForm() {
       const response = await authApi.login(formData);
       const user = response.user;
 
-      if (user.role === "admin") {
-        router.push("/admin/dashboard");
+      if (user.is_super_admin || user.role === "admin") {
+        router.replace("/admin/dashboard");
+      } else if (user.status === "pending") {
+        router.replace("/pending");
       } else {
-        router.push("/platform");
+        router.replace("/platform");
       }
     } catch (err: any) {
       const errorMessage = handleApiError(err);
@@ -105,6 +108,17 @@ function LoginForm() {
           </div>
 
           <AnimatePresence mode="wait">
+            {reason === 'role_changed' && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="p-5 rounded-2xl text-sm font-bold mb-8 flex items-center gap-3 border bg-blue-500/10 border-blue-500/20 text-blue-600"
+              >
+                <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500" />
+                Your role has been updated. Please log in again to continue.
+              </motion.div>
+            )}
             {(error || successMessage) && (
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}

@@ -3,6 +3,7 @@ import { asyncHandler } from "../middleware/errorHandler.js";
 import { AppError } from "../utils/AppError.js";
 import { logAuditEvent, AuditActions } from "../services/audit.service.js";
 
+
 export const register = asyncHandler(async (req, res) => {
   const { name, email, reg_no, year, domain, password } = req.body;
 
@@ -220,3 +221,5 @@ export const changePassword = asyncHandler(async (req, res) => {
     data: result
   });
 });
+
+

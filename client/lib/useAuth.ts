@@ -15,29 +15,47 @@ export function useAuth() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { apiClient } = await import('./api-client');
-        const response = await apiClient.get('/auth/me');
-        const userData = response.data?.data?.user || response.data?.user;
-        if (userData) {
-          setUser(userData);
-          setIsLoggedIn(true);
-        } else {
-          setUser(null);
-          setIsLoggedIn(false);
-        }
-      } catch {
+  const fetchUser = useCallback(async () => {
+    try {
+      const { apiClient } = await import('./api-client');
+      const response = await apiClient.get('/auth/me');
+      const userData = response.data?.data?.user || response.data?.user;
+      if (userData) {
+        setUser(userData);
+        setIsLoggedIn(true);
+        return userData;
+      } else {
         setUser(null);
         setIsLoggedIn(false);
-      } finally {
-        setLoading(false);
+        return null;
+      }
+    } catch {
+      setUser(null);
+      setIsLoggedIn(false);
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    const initial = async () => {
+      setLoading(true);
+      await fetchUser();
+      setLoading(false);
+    };
+    initial();
+  }, [fetchUser]);
+
+  useEffect(() => {
+    let isFirst = true;
+    const handleVisible = () => {
+      if (document.visibilityState === 'visible') {
+        if (isFirst) { isFirst = false; return; }
+        fetchUser();
       }
     };
-
-    checkAuth();
-  }, []);
+    document.addEventListener('visibilitychange', handleVisible);
+    return () => document.removeEventListener('visibilitychange', handleVisible);
+  }, [fetchUser]);
 
   const login = useCallback((userData: User) => {
     setUser(userData);
@@ -49,11 +67,16 @@ export function useAuth() {
     setIsLoggedIn(false);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    return fetchUser();
+  }, [fetchUser]);
+
   return {
     user,
     isLoggedIn,
     loading,
     login,
     logout,
+    refreshUser,
   };
 }

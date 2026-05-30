@@ -66,6 +66,35 @@ export const promoteUser = asyncHandler(async (req, res) => {
   res.json({ success: true, data: result });
 });
 
+export const demoteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (id === req.user.id) {
+    throw new AppError('You cannot demote yourself', 400, 'BAD_REQUEST');
+  }
+
+  const target = await prisma.user.findUnique({ where: { id } });
+  if (!target) throw new AppError('User not found', 404, 'NOT_FOUND');
+  if (target.is_super_admin) {
+    throw new AppError('Cannot demote a super admin', 403, 'FORBIDDEN');
+  }
+
+  const updated = await prisma.user.update({
+    where: { id },
+    data: { role: 'member' },
+    select: { id: true, email: true, name: true, role: true },
+  });
+
+  await prisma.refreshToken.updateMany({
+    where: { user_id: id, revoked: false },
+    data: { revoked: true },
+  });
+
+  logAuditEvent({ userId: req.user?.id, action: AuditActions.USER_DEMOTED, entity: 'User', entityId: id, ip: req.ip });
+
+  res.json({ success: true, data: updated });
+});
+
 export const rejectBlog = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { reason } = req.body;

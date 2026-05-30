@@ -18,6 +18,7 @@ export interface User {
   year?: string;
   status?: string;
   created_at?: string;
+  is_super_admin?: boolean;
 }
 
 export interface AuthResponse {
@@ -117,8 +118,7 @@ export const authApi = {
     password: string;
   }): Promise<AuthResponse> => {
     const response = await apiClient.post("/auth/login", data);
-    const respData = response.data?.data || response.data;
-    return respData;
+    return response.data?.data || response.data;
   },
 
   logout: async (): Promise<void> => {
@@ -290,6 +290,11 @@ export const adminApi = {
 
   promoteUser: async (id: string): Promise<any> => {
     const response = await apiClient.patch(`/admin/users/${id}/promote`);
+    return response.data?.data || response.data;
+  },
+
+  demoteUser: async (id: string): Promise<any> => {
+    const response = await apiClient.patch(`/admin/users/${id}/demote`);
     return response.data?.data || response.data;
   },
 

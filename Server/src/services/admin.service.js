@@ -33,6 +33,7 @@ export async function getAllUsers() {
       domain: true, 
       status: true, 
       role: true, 
+      is_super_admin: true,
       created_at: true 
     },
     orderBy: { created_at: 'desc' }
@@ -54,4 +55,26 @@ export async function approveUser(id) {
   });
 
   return { message: 'User approved successfully', user: { id: user.id, email: user.email, status: user.status } };
+}
+
+export async function promoteToAdmin(userId) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error('User not found');
+  if (user.is_super_admin) throw new Error('User is already a super admin');
+
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      role: 'admin',
+      status: 'approved',
+    },
+    select: { id: true, email: true, name: true, role: true, status: true },
+  });
+
+  await prisma.refreshToken.updateMany({
+    where: { user_id: userId, revoked: false },
+    data: { revoked: true },
+  });
+
+  return updated;
 }

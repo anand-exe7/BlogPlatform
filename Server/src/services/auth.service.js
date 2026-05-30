@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import prisma from "../db/db.js";
+import { AppError } from "../utils/AppError.js";
 import { signJwt, generateRefreshToken, hashToken, getRefreshTokenExpiry } from "../middleware/jwt.js";
 import { sendMail } from "../middleware/mail.js";
 
@@ -145,12 +146,20 @@ export async function login(email, password) {
 export async function refreshAccessToken(refreshTokenValue) {
   const tokenHash = hashToken(refreshTokenValue);
   const stored = await prisma.refreshToken.findFirst({
-    where: { token_hash: tokenHash, revoked: false, expires_at: { gt: new Date() } },
+    where: { token_hash: tokenHash },
     include: { user: true },
   });
 
   if (!stored) {
-    throw new Error('Invalid or expired refresh token');
+    throw new AppError('Invalid refresh token', 401, 'INVALID_TOKEN');
+  }
+
+  if (stored.revoked) {
+    throw new AppError('Session invalidated. Please log in again.', 401, 'SESSION_REVOKED');
+  }
+
+  if (stored.expires_at <= new Date()) {
+    throw new AppError('Refresh token expired', 401, 'TOKEN_EXPIRED');
   }
 
   await prisma.refreshToken.update({

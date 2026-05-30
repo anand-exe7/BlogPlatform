@@ -52,7 +52,7 @@ export default function AdminDashboard() {
         setShowLoginModal(true);
         return;
       }
-      if (!user?.is_super_admin) {
+      if (user?.role !== "admin" && !user?.is_super_admin) {
         router.push("/platform");
         return;
       }
@@ -96,6 +96,34 @@ export default function AdminDashboard() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePromoteUser = async (userId: string) => {
+    setActionLoading(userId);
+    try {
+      await adminApi.promoteUser(userId);
+      const refreshedUsers = await adminApi.getAllUsers();
+      setAllUsers(refreshedUsers);
+      toast.success("User promoted to admin!");
+    } catch (err) {
+      toast.error(handleApiError(err));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDemoteUser = async (userId: string) => {
+    setActionLoading(userId);
+    try {
+      await adminApi.demoteUser(userId);
+      const refreshedUsers = await adminApi.getAllUsers();
+      setAllUsers(refreshedUsers);
+      toast.success("User demoted to member!");
+    } catch (err) {
+      toast.error(handleApiError(err));
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -156,6 +184,22 @@ export default function AdminDashboard() {
       setActionLoading(null);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#f8f7f4] flex flex-col items-center justify-center">
+        <GrainOverlay />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f5b800] mb-4" />
+        <p className="font-black text-gray-500 uppercase tracking-widest text-xs">
+          Accessing Control Center...
+        </p>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return null;
+  }
 
   if (loading && !stats) {
     return (
@@ -561,6 +605,24 @@ export default function AdminDashboard() {
                                   className="text-amber-600 font-black text-xs hover:underline uppercase tracking-widest"
                                 >
                                   Approve Now
+                                </button>
+                              )}
+                              {u.status === "approved" && u.role === "member" && (
+                                <button
+                                  onClick={() => handlePromoteUser(u.id)}
+                                  disabled={actionLoading === u.id}
+                                  className="text-blue-600 font-black text-xs hover:underline uppercase tracking-widest disabled:opacity-50"
+                                >
+                                  {actionLoading === u.id ? "..." : "Promote to Admin"}
+                                </button>
+                              )}
+                              {u.status === "approved" && u.role === "admin" && !u.is_super_admin && (
+                                <button
+                                  onClick={() => handleDemoteUser(u.id)}
+                                  disabled={actionLoading === u.id}
+                                  className="text-red-500 font-black text-xs hover:underline uppercase tracking-widest disabled:opacity-50"
+                                >
+                                  {actionLoading === u.id ? "..." : "Demote to Member"}
                                 </button>
                               )}
                             </td>
