@@ -69,11 +69,6 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
       });
 
       if (response.user) {
-        localStorage.setItem('user', JSON.stringify(response.user));
-        localStorage.setItem('isLoggedIn', 'true');
-        if (response.token) {
-          localStorage.setItem('auth_token', response.token);
-        }
       }
 
       onSuccess();

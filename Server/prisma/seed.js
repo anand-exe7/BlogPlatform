@@ -34,39 +34,13 @@ async function main() {
       ref_code: "SC-ADMIN001",
       status: "approved",
       role: "admin",
+      is_super_admin: true,
       password_hash: passwordHash,
       email_verified: true,
     },
   });
 
-  // Create the premium auto-login user
-  const premiumEmail = "anandsiva0317@gmail.com";
-  const premiumPassword = "siva1234";
-  const premiumHash = await bcrypt.hash(premiumPassword, 12);
-
-  const premiumUser = await prisma.user.upsert({
-    where: { email: premiumEmail },
-    update: {
-      status: "approved",
-      password_hash: premiumHash,
-    },
-    create: {
-      name: "Anand S",
-      email: premiumEmail,
-      reg_no: "VINO-001",
-      year: "2024",
-      domain: "Computer Science",
-      ref_code: "SC-VINO001",
-      status: "approved",
-      role: "member",
-      password_hash: premiumHash,
-      email_verified: true,
-    },
-  });
-
-  console.log("Admin and Premium user created successfully!");
-  console.log(`Premium User: ${premiumUser.email}`);
-  console.log(`Premium Password: ${premiumPassword}`);
+  console.log("Admin created successfully!");
 
   console.log("Admin created successfully!");
   console.log(`ID: ${admin.id}`);

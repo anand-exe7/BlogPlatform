@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface User {
   id: string;
@@ -16,50 +16,38 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const storedUser = localStorage.getItem('user');
-      const isLoggedInFlag = localStorage.getItem('isLoggedIn');
-      const token = localStorage.getItem('auth_token');
-
-      if (storedUser && isLoggedInFlag === 'true' && token) {
-        try {
-          setUser(JSON.parse(storedUser));
+    const checkAuth = async () => {
+      try {
+        const { apiClient } = await import('./api-client');
+        const response = await apiClient.get('/auth/me');
+        const userData = response.data?.data?.user || response.data?.user;
+        if (userData) {
+          setUser(userData);
           setIsLoggedIn(true);
-        } catch (err) {
-          console.error('Failed to parse stored user:', err);
-          localStorage.removeItem('user');
-          localStorage.removeItem('isLoggedIn');
+        } else {
           setUser(null);
           setIsLoggedIn(false);
         }
-      } else {
+      } catch {
         setUser(null);
         setIsLoggedIn(false);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();
-    
-    // Listen for storage changes from other tabs or interceptors
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
   }, []);
 
-  const login = (userData: User) => {
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('isLoggedIn', 'true');
+  const login = useCallback((userData: User) => {
     setUser(userData);
     setIsLoggedIn(true);
-  };
+  }, []);
 
-  const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('auth_token');
+  const logout = useCallback(() => {
     setUser(null);
     setIsLoggedIn(false);
-  };
+  }, []);
 
   return {
     user,

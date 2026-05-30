@@ -11,7 +11,7 @@ export const generateTestToken = (userId, status = 'approved', role = 'member') 
         role
     };
     
-    return jwt.sign(payload, process.env.JWT_SECRET || 'your-secret-key', {
+    return jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: '24h'
     });
 };
@@ -26,7 +26,7 @@ export const testAuthMiddleware = () => {
     
     // Test token verification
     try {
-        const decoded = jwt.verify(testToken, process.env.JWT_SECRET || 'your-secret-key');
+        const decoded = jwt.verify(testToken, process.env.JWT_SECRET);
         console.log('Token verification successful:', decoded);
         return true;
     } catch (error) {

@@ -40,18 +40,8 @@ function LoginForm() {
       const user = response.user;
 
       if (user.role === "admin") {
-        if (response.token) {
-          localStorage.setItem('auth_token', response.token);
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('user', JSON.stringify(user));
-        }
         router.push("/admin/dashboard");
       } else {
-        if (response.token) {
-          localStorage.setItem('auth_token', response.token);
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('user', JSON.stringify(user));
-        }
         router.push("/platform");
       }
     } catch (err: any) {

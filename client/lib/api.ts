@@ -1,7 +1,6 @@
 import { AxiosError } from "axios";
 import apiClient from "./api-client";
 
-// Define response types
 export interface ApiResponse<T> {
   data?: T;
   message?: string;
@@ -22,7 +21,7 @@ export interface User {
 }
 
 export interface AuthResponse {
-  token: string;
+  token?: string;
   user: User;
   message?: string;
   success?: boolean;
@@ -67,7 +66,6 @@ export interface Post {
   userLiked?: boolean;
 }
 
-// Error handling utility
 export const handleApiError = (error: unknown): string => {
   if (error instanceof AxiosError) {
     const respData = error.response?.data as any;
@@ -92,7 +90,6 @@ export const handleApiError = (error: unknown): string => {
   return "An unexpected error occurred";
 };
 
-// Auth endpoints
 export const authApi = {
   signup: async (data: {
     name: string;
@@ -121,20 +118,10 @@ export const authApi = {
   }): Promise<AuthResponse> => {
     const response = await apiClient.post("/auth/login", data);
     const respData = response.data?.data || response.data;
-    if (respData.user) {
-      localStorage.setItem("user", JSON.stringify(respData.user));
-    }
-    if (respData.token) {
-      localStorage.setItem("auth_token", respData.token);
-      localStorage.setItem("isLoggedIn", "true"); // Add this for useAuth
-    }
     return respData;
   },
 
   logout: async (): Promise<void> => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("auth_token");
     await apiClient.post("/auth/logout");
   },
 
@@ -149,7 +136,6 @@ export const authApi = {
   },
 };
 
-// Blog/Post endpoints
 export const blogApi = {
   getAllPosts: async (page?: number, limit?: number): Promise<Post[]> => {
     const response = await apiClient.get("/blogs/public", {
@@ -167,13 +153,12 @@ export const blogApi = {
     title: string;
     content: string;
     image?: string;
-    coverImage?: string; // Support both
+    coverImage?: string;
     links?: string;
     slug?: string;
     excerpt?: string;
     tagSlugs?: string[];
   }): Promise<Post> => {
-    // Standardize fields for backend
     const mappedData = {
       title: data.title,
       content: data.content,
@@ -210,7 +195,6 @@ export const blogApi = {
   },
 };
 
-// Interaction endpoints
 export const interactionApi = {
   getLikes: async (
     blogId: string,
@@ -248,7 +232,6 @@ export const interactionApi = {
   },
 };
 
-// Search endpoints
 export const searchApi = {
   searchPosts: async (query: string): Promise<Post[]> => {
     const response = await apiClient.get("/search", {
@@ -258,7 +241,6 @@ export const searchApi = {
   },
 };
 
-// Health check
 export const healthApi = {
   check: async (): Promise<{ status: string; timestamp: string }> => {
     const response = await apiClient.get("/health");
@@ -266,21 +248,17 @@ export const healthApi = {
   },
 };
 
-// Dev endpoints
 export const devApi = {
   getAllUsers: async (): Promise<any[]> => {
     const response = await apiClient.get("/dev/users");
     return response.data?.data || [];
   },
   updateUserStatus: async (id: string, status: string): Promise<any> => {
-    const response = await apiClient.patch(`/dev/users/${id}/status`, {
-      status,
-    });
+    const response = await apiClient.patch(`/dev/users/${id}/status`, { status });
     return response.data?.data;
   },
 };
 
-// Admin endpoints
 export const adminApi = {
   getStats: async (): Promise<{
     totalUsers: number;
@@ -307,6 +285,11 @@ export const adminApi = {
 
   approveUser: async (id: string): Promise<any> => {
     const response = await apiClient.patch(`/admin/users/${id}/approve`);
+    return response.data?.data || response.data;
+  },
+
+  promoteUser: async (id: string): Promise<any> => {
+    const response = await apiClient.patch(`/admin/users/${id}/promote`);
     return response.data?.data || response.data;
   },
 

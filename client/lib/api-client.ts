@@ -1,60 +1,67 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-// Get the API base URL from environment or use default
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
-// Create axios instance with safe defaults
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Send cookies with requests for auth
-  timeout: 30000, // 30 second timeout
+  withCredentials: true,
+  timeout: 30000,
 });
 
-// Request interceptor for error handling
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (value: any) => void; reject: (reason: any) => void }> = [];
+
+function processQueue(error: any, token: any = null) {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+}
+
 apiClient.interceptors.request.use(
   (config) => {
-    // If we have a token in localStorage, use it for Authorization header
-    // Some routers prefer header over cookies
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    // Handle specific error codes
-    if (error.response?.status === 401) {
-      // Unauthorized - clear auth and trigger re-login
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('user');
-        // Optional: window.location.reload() or event bus to show modal
+  async (error: AxiosError) => {
+    const originalRequest = error.config as any;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => {
+          return apiClient(originalRequest);
+        });
+      }
+
+      isRefreshing = true;
+
+      try {
+        await apiClient.post('/auth/refresh');
+        processQueue(null);
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
-    if (error.response?.status === 403) {
-      // Forbidden
-      console.error('Access forbidden');
-    }
-    if (error.response?.status === 404) {
-      // Not found
-      console.error('Resource not found');
-    }
-    if (error.response?.status === 500) {
-      // Server error
-      console.error('Server error occurred');
-    }
+
     return Promise.reject(error);
   }
 );

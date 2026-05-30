@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
+import { authApi } from "@/lib/api";
 
 interface UserProfile {
   id: string;
@@ -44,30 +45,30 @@ export default function MemberProfile() {
   const [message, setMessage] = useState({ type: "", text: "" });
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (!userData) {
-      router.push("/login");
-      return;
-    }
-
-    const parsedUser = JSON.parse(userData);
-    if (parsedUser.role !== "member") {
-      if (parsedUser.role === "admin") {
-        router.push("/admin/profile");
-      } else {
+    const loadUser = async () => {
+      try {
+        const userData = await authApi.getMe();
+        if (userData.role !== "member") {
+          if (userData.role === "admin") {
+            router.push("/admin/profile");
+          } else {
+            router.push("/login");
+          }
+          return;
+        }
+        setUser(userData as UserProfile);
+        setFormData({
+          name: userData.name,
+          email: userData.email,
+          year: userData.year || "",
+          domain: userData.domain || "",
+        });
+        fetchStats(userData.id);
+      } catch {
         router.push("/login");
       }
-      return;
-    }
-
-    setUser(parsedUser);
-    setFormData({
-      name: parsedUser.name,
-      email: parsedUser.email,
-      year: parsedUser.year || "",
-      domain: parsedUser.domain || "",
-    });
-    fetchStats(parsedUser.id);
+    };
+    loadUser();
   }, [router]);
 
   const fetchStats = async (userId: string) => {
@@ -121,9 +122,12 @@ export default function MemberProfile() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // proceed with logout even if API call fails
+    }
     router.push("/login");
   };
 

@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import prisma from "../db/db.js";
-import { signJwt } from "../middleware/jwt.js";
+import { signJwt, generateRefreshToken, hashToken, getRefreshTokenExpiry } from "../middleware/jwt.js";
 import { sendMail } from "../middleware/mail.js";
 
 function generateRefCode() {
@@ -28,7 +28,6 @@ export async function register(payload) {
     if (!e) break;
   }
 
-  // Hash password if provided
   let passwordHash = null;
   if (payload.password) {
     passwordHash = await bcrypt.hash(payload.password, 12);
@@ -56,9 +55,7 @@ export async function setPassword(token, password) {
   const user = await prisma.user.findFirst({
     where: {
       set_password_token: token,
-      set_password_expires: {
-        gt: new Date(),
-      },
+      set_password_expires: { gt: new Date() },
     },
   });
 
@@ -85,7 +82,6 @@ export async function setPassword(token, password) {
 
   return true;
 }
-
 
 export async function login(email, password) {
   const user = await prisma.user.findUnique({ where: { email } });
@@ -127,12 +123,72 @@ export async function login(email, password) {
     },
   });
 
-  const token = signJwt({ id: user.id, role: user.role, email: user.email, is_super_admin: user.is_super_admin });
-  return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role, is_super_admin: user.is_super_admin } };
+  const accessToken = signJwt({ id: user.id, role: user.role, email: user.email, is_super_admin: user.is_super_admin });
+
+  const refreshTokenValue = generateRefreshToken();
+  const tokenHash = hashToken(refreshTokenValue);
+  await prisma.refreshToken.create({
+    data: {
+      token_hash: tokenHash,
+      user_id: user.id,
+      expires_at: getRefreshTokenExpiry(),
+    },
+  });
+
+  return {
+    accessToken,
+    refreshToken: refreshTokenValue,
+    user: { id: user.id, email: user.email, name: user.name, role: user.role, is_super_admin: user.is_super_admin }
+  };
+}
+
+export async function refreshAccessToken(refreshTokenValue) {
+  const tokenHash = hashToken(refreshTokenValue);
+  const stored = await prisma.refreshToken.findFirst({
+    where: { token_hash: tokenHash, revoked: false, expires_at: { gt: new Date() } },
+    include: { user: true },
+  });
+
+  if (!stored) {
+    throw new Error('Invalid or expired refresh token');
+  }
+
+  await prisma.refreshToken.update({
+    where: { id: stored.id },
+    data: { revoked: true },
+  });
+
+  const newAccessToken = signJwt({ id: stored.user.id, role: stored.user.role, email: stored.user.email, is_super_admin: stored.user.is_super_admin });
+
+  const newRefreshValue = generateRefreshToken();
+  const newTokenHash = hashToken(newRefreshValue);
+  await prisma.refreshToken.create({
+    data: {
+      token_hash: newTokenHash,
+      user_id: stored.user.id,
+      expires_at: getRefreshTokenExpiry(),
+    },
+  });
+
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshValue,
+    user: { id: stored.user.id, email: stored.user.email, name: stored.user.name, role: stored.user.role, is_super_admin: stored.user.is_super_admin }
+  };
+}
+
+export async function revokeAllUserRefreshTokens(userId) {
+  await prisma.refreshToken.updateMany({
+    where: { user_id: userId, revoked: false },
+    data: { revoked: true },
+  });
 }
 
 export async function getUserById(userId) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, name: true, email: true, reg_no: true, year: true, domain: true, role: true, is_super_admin: true, status: true, created_at: true } });
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, reg_no: true, year: true, domain: true, role: true, is_super_admin: true, status: true, created_at: true }
+  });
   if (!user) throw new Error('User not found');
   return user;
 }
@@ -205,6 +261,8 @@ export async function changePassword(userId, currentPassword, newPassword) {
     where: { id: userId },
     data: { password_hash: newHash }
   });
+
+  await revokeAllUserRefreshTokens(userId);
 
   return { message: 'Password updated successfully' };
 }
