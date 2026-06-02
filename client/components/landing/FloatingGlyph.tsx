@@ -30,35 +30,27 @@ export default function FloatingGlyph({ icon: Icon, letter, x, y, rotate, scale,
         top: "50%",
         marginLeft: -32,
         marginTop: -32,
-        transformStyle: "preserve-3d",
+        willChange: "transform, opacity",
       }}
       className="z-10"
     >
       <motion.div
         style={{
           opacity: useTransform(glyphProgress, [0, 0.2], [0, 1]),
+          willChange: "opacity",
         }}
-        className="relative p-4 bg-white/95 backdrop-blur-xl rounded-2xl border-2 border-[#0B1220]/15 shadow-[30px_30px_80px_-15px_rgba(11,18,32,0.25)]"
+        className="relative p-4 bg-white rounded-2xl border-2 border-[#0B1220]/15 shadow-sm"
       >
-        {/* Breathing Animation Wrapper */}
-        <motion.div
-          animate={{
-            scale: [1, 1.08, 1],
-            rotate: [0, 1, -1, 0],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: delay * 2,
-          }}
-          className="relative flex items-center justify-center w-10 h-10"
+        {/* Hardware Accelerated CSS Breathing Animation */}
+        <div
+          style={{ animationDelay: `${delay * 2}s` }}
+          className="relative flex items-center justify-center w-10 h-10 animate-float-breath"
         >
           <Icon className="w-8 h-8 text-[#0B1220]" strokeWidth={2.5} />
           <span className="absolute -top-6 -right-6 text-5xl font-black text-[#0B1220]/5 select-none pointer-events-none italic">
             {letter}
           </span>
-        </motion.div>
+        </div>
       </motion.div>
     </motion.div>
   )

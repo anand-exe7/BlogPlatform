@@ -13,4 +13,4 @@ process.on("uncaughtException", (error) => {
   process.exit(1);
 });
 
-app.listen(PORT, () => logger.info(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => logger.info(`Server running on http://localhost:${PORT}`)); // triggered restart

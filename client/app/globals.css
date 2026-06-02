@@ -10,6 +10,16 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --animate-float-breath: float-breath 6s ease-in-out infinite;
+
+  @keyframes float-breath {
+    0%, 100% {
+      transform: scale(1) rotate(0deg);
+    }
+    50% {
+      transform: scale(1.06) rotate(1deg);
+    }
+  }
 }
 
 @media (prefers-color-scheme: dark) {

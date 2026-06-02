@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
-import Image from "next/image"
-import { useEffect, useState } from "react"
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const heroItems = [
   {
@@ -18,7 +18,7 @@ const heroItems = [
     word: "Publish.",
     color: "text-[#0B1220]",
   },
-]
+];
 
 function SkidDust({ delay }: { delay: number }) {
   return (
@@ -53,18 +53,18 @@ function SkidDust({ delay }: { delay: number }) {
         className="h-full w-full origin-left rounded-full bg-[#0B1220]/20 blur-[2px]"
       />
     </div>
-  )
+  );
 }
 
 function UnscrambleText({ word }: { word: string }) {
-  const [hovered, setHovered] = useState(false)
+  const [hovered, setHovered] = useState(false);
 
   // Pre-generate random values so they don't change on re-render
   const randomValues = word.split("").map((_, i) => ({
     yOffset: Math.random() * 50 - 25,
     xOffset: Math.random() * 40 - 20,
     rotationOffset: Math.random() * 120 - 60,
-  }))
+  }));
 
   return (
     <motion.div
@@ -79,9 +79,24 @@ function UnscrambleText({ word }: { word: string }) {
           animate={
             hovered
               ? {
-                  y: [0, randomValues[i].yOffset, randomValues[i].yOffset * 0.3, 0],
-                  x: [0, randomValues[i].xOffset, randomValues[i].xOffset * 0.4, 0],
-                  rotate: [0, randomValues[i].rotationOffset, randomValues[i].rotationOffset * 0.5, 0],
+                  y: [
+                    0,
+                    randomValues[i].yOffset,
+                    randomValues[i].yOffset * 0.3,
+                    0,
+                  ],
+                  x: [
+                    0,
+                    randomValues[i].xOffset,
+                    randomValues[i].xOffset * 0.4,
+                    0,
+                  ],
+                  rotate: [
+                    0,
+                    randomValues[i].rotationOffset,
+                    randomValues[i].rotationOffset * 0.5,
+                    0,
+                  ],
                   opacity: [1, 0.3, 0.6, 1],
                   scaleX: [1, 0.5, 1.2, 1],
                   scaleY: [1, 1.4, 0.8, 1],
@@ -99,27 +114,27 @@ function UnscrambleText({ word }: { word: string }) {
         </motion.span>
       ))}
     </motion.div>
-  )
+  );
 }
 
 export function Hero() {
-  const [isMounted, setIsMounted] = useState(false)
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
+  const [isMounted, setIsMounted] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
   // Smooth springs for mouse interaction
-  const smoothX = useSpring(mouseX, { damping: 20, stiffness: 100 })
-  const smoothY = useSpring(mouseY, { damping: 20, stiffness: 100 })
+  const smoothX = useSpring(mouseX, { damping: 20, stiffness: 100 });
+  const smoothY = useSpring(mouseY, { damping: 20, stiffness: 100 });
 
   // Parallax transforms
-  const paperRotate = useTransform(smoothX, [-500, 500], [-12, -4])
-  const paperX = useTransform(smoothX, [-500, 500], [-20, 20])
-  const paperY = useTransform(smoothY, [-500, 500], [-20, 20]) // Centered around the 0 initial position
-  const watermarkX = useTransform(smoothX, [-500, 500], [-50, 50])
-  const watermarkY = useTransform(smoothY, [-500, 500], [-50, 50])
+  const paperRotate = useTransform(smoothX, [-500, 500], [-12, -4]);
+  const paperX = useTransform(smoothX, [-500, 500], [-20, 20]);
+  const paperY = useTransform(smoothY, [-500, 500], [-20, 20]); // Centered around the 0 initial position
+  const watermarkX = useTransform(smoothX, [-500, 500], [-50, 50]);
+  const watermarkY = useTransform(smoothY, [-500, 500], [-50, 50]);
 
-  const logoX = useTransform(smoothX, [-500, 500], [20, -20])
-  const logoY = useTransform(smoothY, [-500, 500], [20, -20])
+  const logoX = useTransform(smoothX, [-500, 500], [20, -20]);
+  const logoY = useTransform(smoothY, [-500, 500], [20, -20]);
 
   const paperBackground = useTransform(
     smoothX,
@@ -128,19 +143,19 @@ export function Hero() {
       "radial-gradient(circle at 0% 0%, rgba(242,178,0,0.1) 0%, transparent 50%)",
       "radial-gradient(circle at 100% 0%, rgba(242,178,0,0.1) 0%, transparent 50%)",
     ],
-  )
+  );
 
   useEffect(() => {
-    setIsMounted(true)
+    setIsMounted(true);
     const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX - window.innerWidth / 2)
-      mouseY.set(e.clientY - window.innerHeight / 2)
-    }
-    window.addEventListener("mousemove", handleMouseMove)
-    return () => window.removeEventListener("mousemove", handleMouseMove)
-  }, [mouseX, mouseY])
+      mouseX.set(e.clientX - window.innerWidth / 2);
+      mouseY.set(e.clientY - window.innerHeight / 2);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
 
-  if (!isMounted) return null
+  if (!isMounted) return null;
 
   return (
     <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#FEF0D8] px-6 pt-32 pb-20 lg:flex-row lg:px-20 lg:pt-0">
@@ -151,7 +166,11 @@ export function Hero() {
       >
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 150, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          transition={{
+            duration: 150,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "linear",
+          }}
           className="text-[45vw] font-black leading-none tracking-tighter text-[#0B1220]"
         >
           BLOG SITE
@@ -210,9 +229,13 @@ export function Hero() {
           >
             <div className="relative flex h-40 w-40 items-center justify-center lg:h-80 lg:w-80">
               <div className="absolute inset-0 bg-[#0B1220] [clip-path:polygon(25%_0%,75%_0%,100%_50%,75%_100%,25%_100%,0%_50%)]" />
-              <span className="relative z-10 text-4xl font-black text-[#FEF0D8] lg:text-8xl">B</span>
+              <span className="relative z-10 text-4xl font-black text-[#FEF0D8] lg:text-8xl">
+                B
+              </span>
             </div>
-            <span className="mt-4 text-4xl font-black tracking-tighter text-[#0B1220] lg:text-8xl">BLOG</span>
+            <span className="mt-4 text-4xl font-black tracking-tighter text-[#0B1220] lg:text-8xl">
+              BLOG
+            </span>
           </motion.div>
         </motion.div>
 
@@ -227,10 +250,22 @@ export function Hero() {
         {/* Blog Article Visual (Physical Mouse-reactive Paper) */}
         <motion.div
           style={{ rotate: paperRotate, x: paperX, y: paperY }}
-          initial={{ y: "-120vh", rotate: -30, scale: 0.5, filter: "blur(10px)" }}
+          initial={{
+            y: "-120vh",
+            rotate: -30,
+            scale: 0.5,
+            filter: "blur(10px)",
+          }}
           animate={{ y: 0, rotate: -8, scale: 1, filter: "blur(0px)" }}
           transition={{
-            y: { duration: 1.2, delay: 2.2, ease: [0.23, 1, 0.32, 1], type: "spring", damping: 12, stiffness: 70 },
+            y: {
+              duration: 1.2,
+              delay: 2.2,
+              ease: [0.23, 1, 0.32, 1],
+              type: "spring",
+              damping: 12,
+              stiffness: 70,
+            },
             rotate: { duration: 1.5, delay: 2.2 },
             scale: { duration: 0.8, delay: 2.2 },
             filter: { duration: 1.2, delay: 2.2 },
@@ -246,7 +281,10 @@ export function Hero() {
 
           <div className="mb-4 flex flex-wrap gap-2 lg:mb-6">
             {["EDITORIAL", "FUTURE"].map((tag) => (
-              <span key={tag} className="bg-[#0B1220] px-2 py-0.5 text-[10px] font-black tracking-widest text-white">
+              <span
+                key={tag}
+                className="bg-[#0B1220] px-2 py-0.5 text-[10px] font-black tracking-widest text-white"
+              >
                 {tag}
               </span>
             ))}
@@ -293,5 +331,5 @@ export function Hero() {
         }}
       />
     </section>
-  )
+  );
 }

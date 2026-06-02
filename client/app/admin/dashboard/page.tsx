@@ -49,14 +49,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!authLoading) {
       if (!isLoggedIn) {
-        setShowLoginModal(true);
+        router.push("/login");
         return;
       }
       if (user?.role !== "admin" && !user?.is_super_admin) {
         router.push("/platform");
         return;
       }
-      setShowLoginModal(false);
       fetchData();
     }
   }, [authLoading, isLoggedIn, user, router]);

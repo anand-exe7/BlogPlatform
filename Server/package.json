@@ -20,8 +20,11 @@
     "express": "^4.22.2",
     "express-rate-limit": "^7.1.5",
     "express-validator": "^6.15.0",
+    "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.0",
-    "nodemailer": "^8.0.5"
+    "nodemailer": "^8.0.5",
+    "uuid": "^14.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",
