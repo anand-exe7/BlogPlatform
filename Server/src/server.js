@@ -1,15 +1,16 @@
 import app from "./app.js";
+import { logger } from "./utils/logger.js";
+import "./config/env.js";
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("FATAL: Unhandled Rejection at:", promise, "reason:", reason);
-  // Optional: process.exit(1);
+process.on("unhandledRejection", (reason) => {
+  logger.error("FATAL: Unhandled Rejection", { reason: reason?.toString() });
 });
 
 process.on("uncaughtException", (error) => {
-  console.error("FATAL: Uncaught Exception:", error);
-  // Optional: process.exit(1);
+  logger.error("FATAL: Uncaught Exception", { message: error.message, stack: error.stack });
+  process.exit(1);
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => logger.info(`Server running on http://localhost:${PORT}`));

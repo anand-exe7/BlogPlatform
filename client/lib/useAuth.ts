@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface User {
   id: string;
@@ -15,51 +15,61 @@ export function useAuth() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const storedUser = localStorage.getItem('user');
-      const isLoggedInFlag = localStorage.getItem('isLoggedIn');
-      const token = localStorage.getItem('auth_token');
-
-      if (storedUser && isLoggedInFlag === 'true' && token) {
-        try {
-          setUser(JSON.parse(storedUser));
-          setIsLoggedIn(true);
-        } catch (err) {
-          console.error('Failed to parse stored user:', err);
-          localStorage.removeItem('user');
-          localStorage.removeItem('isLoggedIn');
-          setUser(null);
-          setIsLoggedIn(false);
-        }
+  const fetchUser = useCallback(async () => {
+    try {
+      const { apiClient } = await import('./api-client');
+      const response = await apiClient.get('/auth/me');
+      const userData = response.data?.data?.user || response.data?.user;
+      if (userData) {
+        setUser(userData);
+        setIsLoggedIn(true);
+        return userData;
       } else {
         setUser(null);
         setIsLoggedIn(false);
+        return null;
       }
-      setLoading(false);
-    };
-
-    checkAuth();
-    
-    // Listen for storage changes from other tabs or interceptors
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
+    } catch {
+      setUser(null);
+      setIsLoggedIn(false);
+      return null;
+    }
   }, []);
 
-  const login = (userData: User) => {
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('isLoggedIn', 'true');
+  useEffect(() => {
+    const initial = async () => {
+      setLoading(true);
+      await fetchUser();
+      setLoading(false);
+    };
+    initial();
+  }, [fetchUser]);
+
+  useEffect(() => {
+    let isFirst = true;
+    const handleVisible = () => {
+      if (document.visibilityState === 'visible') {
+        if (isFirst) { isFirst = false; return; }
+        fetchUser();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisible);
+    return () => document.removeEventListener('visibilitychange', handleVisible);
+  }, [fetchUser]);
+
+  const login = useCallback((userData: User) => {
     setUser(userData);
     setIsLoggedIn(true);
-  };
+  }, []);
 
-  const logout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('auth_token');
+  const logout = useCallback(() => {
     setUser(null);
     setIsLoggedIn(false);
-  };
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    return fetchUser();
+  }, [fetchUser]);
 
   return {
     user,
@@ -67,5 +77,6 @@ export function useAuth() {
     loading,
     login,
     logout,
+    refreshUser,
   };
 }

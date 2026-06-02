@@ -8,33 +8,64 @@ datasource db {
 }
 
 model User {
-  id                    String     @id @default(uuid())
+  id                    String      @id @default(uuid())
   name                  String
-  email                 String     @unique
-  reg_no                String     @unique
+  email                 String      @unique
+  reg_no                String      @unique
   year                  String
   domain                String
-  ref_code              String     @unique
-  status                UserStatus @default(pending)
+  ref_code              String      @unique
+  status                UserStatus  @default(pending)
   password_hash         String?
-  role                  UserRole   @default(member)
-  is_super_admin        Boolean    @default(false)
+  role                  UserRole    @default(member)
+  is_super_admin        Boolean     @default(false)
   set_password_token    String?
   set_password_expires  DateTime?
-  email_verified        Boolean    @default(false)
+  email_verified        Boolean     @default(false)
   verification_token    String?
-  failed_login_attempts Int        @default(0)
+  failed_login_attempts Int         @default(0)
   lock_until            DateTime?
-  created_at            DateTime   @default(now())
-  updated_at            DateTime   @updatedAt
+  created_at            DateTime    @default(now())
+  updated_at            DateTime    @updatedAt
   blogs                 Blog[]
   comments              Comment[]
   likes                 Like[]
+  refresh_tokens        RefreshToken[]
+  audit_logs            AuditLog[]
 
   @@index([email])
   @@index([ref_code])
   @@index([status])
   @@index([role])
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+  token_hash String
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  expires_at DateTime
+  created_at DateTime @default(now())
+  revoked    Boolean  @default(false)
+
+  @@index([token_hash])
+  @@index([user_id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  user_id   String?
+  user      User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  action    String
+  entity    String?
+  entity_id String?
+  metadata  Json?
+  ip        String?
+  created_at DateTime @default(now())
+
+  @@index([user_id])
+  @@index([action])
+  @@index([created_at])
 }
 
 model Blog {

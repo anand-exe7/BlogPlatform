@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.post("/login", loginLimiter, authController.login);
 router.post("/logout", authController.logout);
+router.post("/refresh", authController.refreshToken);
 
 router.get("/me", authenticate, authController.getCurrentUser);
 router.post("/change-password", authenticate, authController.changePassword);
-
 export default router;

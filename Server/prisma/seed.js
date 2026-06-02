@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-import crypto from "crypto";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -8,79 +7,56 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL || "admin@blogplatform.com";
-  const password = process.env.ADMIN_PASSWORD || "Admin@123456";
-  const name = "Admin";
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+  const name = process.env.ADMIN_NAME || "President";
 
-  console.log("Creating admin user...");
-  console.log(`Email: ${email}`);
+  if (!email || !password) {
+    console.error("❌ ADMIN_EMAIL and ADMIN_PASSWORD must be set in environment");
+    process.exit(1);
+  }
 
-  const passwordHash = await bcrypt.hash(password, 12);
+  if (password.length < 12) {
+    console.error("❌ ADMIN_PASSWORD must be at least 12 characters");
+    process.exit(1);
+  }
 
-  const admin = await prisma.user.upsert({
-    where: { email },
-    update: {
-      role: "admin",
-      status: "approved",
-      password_hash: passwordHash,
-      email_verified: true,
-    },
-    create: {
-      name,
+  const existing = await prisma.user.findFirst({
+    where: { is_super_admin: true },
+  });
+
+  if (existing) {
+    console.log("✅ Super admin already exists — skipping seed");
+    console.log(`   Email: ${existing.email}`);
+    return;
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+
+  const admin = await prisma.user.create({
+    data: {
       email,
+      name,
       reg_no: "ADMIN001",
       year: "2024",
       domain: "admin",
       ref_code: "SC-ADMIN001",
       status: "approved",
       role: "admin",
-      password_hash: passwordHash,
+      is_super_admin: true,
+      password_hash: hashedPassword,
       email_verified: true,
     },
   });
 
-  // Create the premium auto-login user
-  const premiumEmail = "anandsiva0317@gmail.com";
-  const premiumPassword = "siva1234";
-  const premiumHash = await bcrypt.hash(premiumPassword, 12);
-
-  const premiumUser = await prisma.user.upsert({
-    where: { email: premiumEmail },
-    update: {
-      status: "approved",
-      password_hash: premiumHash,
-    },
-    create: {
-      name: "Anand S",
-      email: premiumEmail,
-      reg_no: "VINO-001",
-      year: "2024",
-      domain: "Computer Science",
-      ref_code: "SC-VINO001",
-      status: "approved",
-      role: "member",
-      password_hash: premiumHash,
-      email_verified: true,
-    },
-  });
-
-  console.log("Admin and Premium user created successfully!");
-  console.log(`Premium User: ${premiumUser.email}`);
-  console.log(`Premium Password: ${premiumPassword}`);
-
-  console.log("Admin created successfully!");
-  console.log(`ID: ${admin.id}`);
-  console.log(`Role: ${admin.role}`);
-  console.log(`Status: ${admin.status}`);
-  console.log("\nYou can now login with:");
-  console.log(`Email: ${email}`);
-  console.log(`Password: ${password}`);
-  console.log("\n⚠️  Please change the password after first login!");
+  console.log("✅ Super admin seeded successfully");
+  console.log(`   Email: ${admin.email}`);
+  console.log(`   Name: ${admin.name}`);
 }
 
 main()
   .catch((e) => {
-    console.error("Error creating admin:", e);
+    console.error("❌ Seed failed:", e);
     process.exit(1);
   })
   .finally(async () => {

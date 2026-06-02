@@ -2,12 +2,16 @@ import { AppError } from '../utils/AppError.js';
 import { logger } from '../utils/logger.js';
 
 export function errorHandler(err, req, res, next) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const requestId = req.requestId || 'unknown';
+
   if (err.isOperational) {
     const response = {
       success: false,
       error: {
         message: err.message,
         code: err.code,
+        requestId,
       },
     };
 
@@ -18,20 +22,21 @@ export function errorHandler(err, req, res, next) {
     return res.status(err.statusCode).json(response);
   }
 
-  // Handle regular Error objects
   if (err.message) {
     logger.error('Application error', {
       message: err.message,
       stack: err.stack,
       path: req.path,
       method: req.method,
+      requestId,
     });
 
     return res.status(400).json({
       success: false,
       error: {
-        message: err.message,
+        message: isProduction ? 'An error occurred' : err.message,
         code: 'APPLICATION_ERROR',
+        requestId,
       },
     });
   }
@@ -41,6 +46,7 @@ export function errorHandler(err, req, res, next) {
     stack: err.stack,
     path: req.path,
     method: req.method,
+    requestId,
   });
 
   res.status(500).json({
@@ -48,6 +54,7 @@ export function errorHandler(err, req, res, next) {
     error: {
       message: 'Internal server error',
       code: 'INTERNAL_ERROR',
+      requestId,
     },
   });
 }

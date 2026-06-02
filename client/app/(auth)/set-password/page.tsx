@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
@@ -8,84 +8,38 @@ import api from "@/lib/api";
 function SetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [formData, setFormData] = useState({
-    password: "",
-    confirmPassword: "",
-  });
-  const [token, setToken] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const token = searchParams.get("token");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    const tokenFromUrl = searchParams.get("token");
-    if (tokenFromUrl) {
-      setToken(tokenFromUrl);
-    } else {
-      setError("No token found in URL");
-    }
-  }, [searchParams]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError("");
-  };
+  const isValid = !!token && password.length >= 8 && password === confirmPassword;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValid || submitting) return;
+    setSubmitting(true);
     setError("");
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!");
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      return;
-    }
-
-    if (!token) {
-      setError("Invalid or missing token");
-      return;
-    }
-
-    setIsLoading(true);
-
     try {
-      await api.post("/users/set-password", {
-        token: token,
-        password: formData.password,
-      });
-
-      setSuccess(true);
-      
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      await api.post("/users/set-password", { token, password });
+      router.replace("/login?passwordSet=true");
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || "Failed to set password. Please try again.");
+      setError(err.response?.data?.error?.message || err.response?.data?.error || "Something went wrong");
     } finally {
-      setIsLoading(false);
+      setSubmitting(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-        <div className="text-6xl mb-4">✅</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Password Set!</h2>
-        <p className="text-gray-600 mb-4">Redirecting to login...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
       <div className="text-center mb-6">
         <div className="text-5xl mb-3">🔐</div>
         <h2 className="text-3xl font-bold text-gray-800 mb-2">Set Your Password</h2>
-        <p className="text-gray-600">Your account has been approved! Create a secure password to continue.</p>
+        <p className="text-gray-600">
+          Your account has been approved! Create a secure password to continue.
+        </p>
       </div>
       
       {error && (
@@ -101,13 +55,12 @@ function SetPasswordForm() {
           </label>
           <input
             type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
             placeholder="Enter your password"
             required
-            disabled={isLoading}
+            disabled={submitting}
             minLength={8}
           />
           <p className="text-xs text-gray-500 mt-1">
@@ -121,22 +74,21 @@ function SetPasswordForm() {
           </label>
           <input
             type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
             placeholder="Confirm your password"
             required
-            disabled={isLoading}
+            disabled={submitting}
           />
         </div>
 
         <button
           type="submit"
-          disabled={isLoading || !token}
+          disabled={!isValid || submitting}
           className="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 transition duration-200 mt-6 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {isLoading ? "Setting Password..." : "Set Password"}
+          {submitting ? "Setting Password..." : "Set Password"}
         </button>
       </form>
 
@@ -161,26 +113,10 @@ function SetPasswordForm() {
   );
 }
 
-function LoadingFallback() {
-  return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-      <div className="animate-pulse">
-        <div className="h-8 bg-gray-200 rounded mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded mb-6"></div>
-        <div className="space-y-4">
-          <div className="h-12 bg-gray-200 rounded"></div>
-          <div className="h-12 bg-gray-200 rounded"></div>
-          <div className="h-12 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function SetPasswordPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 flex items-center justify-center p-4">
-      <Suspense fallback={<LoadingFallback />}>
+      <Suspense fallback={null}>
         <SetPasswordForm />
       </Suspense>
     </div>

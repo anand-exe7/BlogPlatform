@@ -38,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isWrapped, setIsWrapped] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  const isAdmin = userRole === "admin" && isSuperAdmin;
+  const isAdmin = userRole === "admin";
 
   // Check if we are on a touch device/mobile to handle interactions differently
   useEffect(() => {

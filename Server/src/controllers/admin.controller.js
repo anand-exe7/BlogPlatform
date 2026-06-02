@@ -3,6 +3,7 @@ import { sendMail, emailTemplates } from '../middleware/mail.js';
 import * as adminService from '../services/admin.service.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { AppError } from '../utils/AppError.js';
+import { logAuditEvent, AuditActions } from '../services/audit.service.js';
 
 export const getDashboardStats = asyncHandler(async (req, res) => {
   const stats = await adminService.getDashboardStats();
@@ -22,6 +23,7 @@ export const getPendingUsers = asyncHandler(async (req, res) => {
 export const approveUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const result = await adminService.approveUser(id);
+  logAuditEvent({ userId: req.user?.id, action: AuditActions.USER_APPROVE, entity: 'User', entityId: id, ip: req.ip });
   res.json({ success: true, data: result });
 });
 
@@ -37,6 +39,7 @@ export const getBlogs = asyncHandler(async (req, res) => {
 });
 
 export const approveBlog = asyncHandler(async (req, res) => {
+  logAuditEvent({ userId: req.user?.id, action: AuditActions.BLOG_APPROVE, entity: 'Blog', entityId: req.params.id, ip: req.ip });
   const { id } = req.params;
   const blog = await prisma.blog.findUnique({ where: { id } });
 
@@ -56,9 +59,46 @@ export const approveBlog = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { message: 'Blog approved and published', blog: updated } });
 });
 
+export const promoteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const result = await adminService.promoteToAdmin(id);
+  logAuditEvent({ userId: req.user?.id, action: AuditActions.USER_PROMOTE, entity: 'User', entityId: id, ip: req.ip });
+  res.json({ success: true, data: result });
+});
+
+export const demoteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (id === req.user.id) {
+    throw new AppError('You cannot demote yourself', 400, 'BAD_REQUEST');
+  }
+
+  const target = await prisma.user.findUnique({ where: { id } });
+  if (!target) throw new AppError('User not found', 404, 'NOT_FOUND');
+  if (target.is_super_admin) {
+    throw new AppError('Cannot demote a super admin', 403, 'FORBIDDEN');
+  }
+
+  const updated = await prisma.user.update({
+    where: { id },
+    data: { role: 'member' },
+    select: { id: true, email: true, name: true, role: true },
+  });
+
+  await prisma.refreshToken.updateMany({
+    where: { user_id: id, revoked: false },
+    data: { revoked: true },
+  });
+
+  logAuditEvent({ userId: req.user?.id, action: AuditActions.USER_DEMOTED, entity: 'User', entityId: id, ip: req.ip });
+
+  res.json({ success: true, data: updated });
+});
+
 export const rejectBlog = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { reason } = req.body;
+  logAuditEvent({ userId: req.user?.id, action: AuditActions.BLOG_REJECT, entity: 'Blog', entityId: id, metadata: { reason }, ip: req.ip });
 
   if (!reason || !reason.trim()) {
     throw new AppError('Rejection reason is required', 400, 'VALIDATION_ERROR');
