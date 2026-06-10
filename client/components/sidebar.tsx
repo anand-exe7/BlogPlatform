@@ -149,20 +149,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </motion.button>
           );
         })}
-        <motion.button
-          onClick={() => (isLoggedIn ? onLogout?.() : onLogin?.())}
-          whileTap={{ scale: 0.9 }}
-          className="flex flex-col items-center gap-0.5 py-1 px-3"
-        >
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${
-            isLoggedIn ? "text-red-400" : "text-gray-400"
-          }`}>
-            {isLoggedIn ? <LogOut size={20} strokeWidth={2.5} /> : <LogIn size={20} strokeWidth={2.5} />}
-          </div>
-          <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">
-            {isLoggedIn ? "Logout" : "Login"}
-          </span>
-        </motion.button>
+
       </div>
     </nav>
   ) : (
@@ -239,30 +226,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </motion.button>
                 </motion.div>
               ))}
-              <div className="w-8 h-[1px] bg-zinc-200/50" />
-              <motion.div
-                className="relative group"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: navItems.length * 0.05 }}
-              >
-                <div className="absolute left-full ml-6 px-4 py-2 bg-[#101828] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl opacity-0 pointer-events-none translate-x-[-15px] transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl whitespace-nowrap z-50">
-                  {isLoggedIn ? "Sign Out" : "Sign In"}
-                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-[#101828]"></div>
-                </div>
-                <motion.button
-                  onClick={() => (isLoggedIn ? onLogout?.() : onLogin?.())}
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-[1.2rem] sm:rounded-[1.4rem] flex items-center justify-center transition-all duration-500 shadow-xl ${
-                    isLoggedIn
-                      ? "bg-red-100 text-red-600 shadow-red-200/20 hover:bg-red-200"
-                      : "bg-[#f5b800]/20 text-[#f5b800] shadow-[#f5b800]/20 hover:bg-[#f5b800]/30"
-                  }`}
-                >
-                  {isLoggedIn ? <LogOut size={24} strokeWidth={2.5} /> : <LogIn size={24} strokeWidth={2.5} />}
-                </motion.button>
-              </motion.div>
+
             </motion.div>
           )}
         </AnimatePresence>
