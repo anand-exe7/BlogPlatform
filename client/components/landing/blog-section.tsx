@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useSpring, AnimatePresence, useVelocity } from "framer-motion"
 import { useEffect, useState, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { ArrowRight, PenTool, Eye, Send } from "lucide-react"
 
 const FEATURES = [
@@ -26,6 +27,7 @@ const FEATURES = [
 ]
 
 export default function BlogLoopSection() {
+  const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [progress, setProgress] = useState(0)
@@ -104,6 +106,7 @@ export default function BlogLoopSection() {
         </motion.p>
 
         <motion.button
+          onClick={() => router.push('/blogs')}
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}

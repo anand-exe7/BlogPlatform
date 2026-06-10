@@ -12,27 +12,27 @@ export default function BlogsPage() {
       <GridPattern />
       
       {/* Public Top Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform shrink-0">
               <BookOpen size={20} />
             </div>
-            <span className="font-black text-xl tracking-tighter uppercase">CodeKrafter</span>
+            <span className="hidden sm:inline font-black text-xl tracking-tighter uppercase">CodeKrafter</span>
           </Link>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <Link 
               href="/login" 
-              className="px-6 py-2.5 rounded-xl font-black text-sm text-gray-500 hover:text-black transition-colors"
+              className="hidden sm:block px-6 py-2.5 rounded-xl font-black text-sm text-gray-500 hover:text-black transition-colors"
             >
               Sign In
             </Link>
             <Link 
               href="/login" 
-              className="px-6 py-2.5 bg-black text-white rounded-xl font-black text-sm shadow-xl hover:shadow-gray-200 transition-all flex items-center gap-2"
+              className="px-4 sm:px-6 py-2.5 bg-black text-white rounded-xl font-black text-sm shadow-xl hover:shadow-gray-200 transition-all flex items-center gap-2"
             >
-              <PenTool size={16} /> Join Club
+              <PenTool size={16} /> <span className="whitespace-nowrap">Join Club</span>
             </Link>
           </div>
         </div>
