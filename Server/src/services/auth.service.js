@@ -19,8 +19,11 @@ export function generatePasswordToken() {
 }
 
 export async function register(payload) {
-  const existing = await prisma.user.findUnique({ where: { email: payload.email } });
-  if (existing) throw new Error('Email already registered');
+  const existingEmail = await prisma.user.findUnique({ where: { email: payload.email } });
+  if (existingEmail) throw new Error('Email already registered');
+
+  const existingRegNo = await prisma.user.findUnique({ where: { reg_no: payload.reg_no } });
+  if (existingRegNo) throw new Error('Registration number already registered');
 
   let ref_code;
   for (let i = 0; i < 10; i++) {
