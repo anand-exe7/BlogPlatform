@@ -160,13 +160,8 @@ export default function DashboardSection({
                 className="mt-6 md:mt-8 max-w-xl text-base md:text-lg lg:text-xl text-gray-500 font-medium leading-relaxed flex flex-wrap items-center gap-2"
               >
                 <span className="text-black font-bold">
-                  Hello {user ? user.name : "Writer"}.
+                  Hello {user ? user.name : "Writer"}!
                 </span>
-                <span>Your words have inspired</span>
-                <div className="flex items-center text-[#f5b800] text-xl md:text-2xl font-black">
-                  <SlotCounter value={totalLikes} />
-                </div>
-                <span>readers.</span>
               </motion.div>
 
               <div className="mt-6 md:mt-10 flex flex-col sm:flex-row gap-3 md:gap-4">

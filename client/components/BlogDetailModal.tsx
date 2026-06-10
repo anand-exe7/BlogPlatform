@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, MessageCircle, Send, Trash2, Loader2 } from 'lucide-react';
 import { Post } from '@/types/blog';
 import { interactionApi, Comment, handleApiError } from '@/lib/api';
+import { useAuth } from '@/lib/useAuth';
 
 interface BlogDetailModalProps {
   selectedPost: Post;
@@ -12,6 +13,7 @@ interface BlogDetailModalProps {
 }
 
 export default function BlogDetailModal({ selectedPost, setSelectedPost, onLike, isLiked }: BlogDetailModalProps) {
+  const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
@@ -128,12 +130,14 @@ export default function BlogDetailModal({ selectedPost, setSelectedPost, onLike,
                   Reply
                 </button>
               )}
-              <button
-                onClick={() => handleDeleteComment(comment.id, parentId)}
-                className="text-gray-300 hover:text-rose-500 opacity-0 group-hover/comment:opacity-100 transition-all text-[10px] font-black uppercase"
-              >
-                Delete
-              </button>
+              {(user?.id === comment.user.id || user?.role === 'admin') && (
+                <button
+                  onClick={() => handleDeleteComment(comment.id, parentId)}
+                  className="text-gray-300 hover:text-rose-500 opacity-0 group-hover/comment:opacity-100 transition-all text-[10px] font-black uppercase"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           </div>
         </div>

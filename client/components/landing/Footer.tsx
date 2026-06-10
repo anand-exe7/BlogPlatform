@@ -44,17 +44,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Explore */}
-        <div className="lg:col-span-2 flex flex-col items-center lg:items-start">
-          <h3 className="text-[#F2A516] text-sm mb-4 font-normal">
-            Explore
-          </h3>
-          <ul className="space-y-2 text-sm text-white">
-            <li><Link href="/events" className="hover:text-[#F2A516]">Events</Link></li>
-            <li><Link href="/projects" className="hover:text-[#F2A516]">Projects</Link></li>
-            <li><Link href="/team" className="hover:text-[#F2A516]">Team</Link></li>
-          </ul>
-        </div>
 
         {/* Social */}
         <div className="lg:col-span-2 flex flex-col items-center lg:items-start">
@@ -92,7 +81,6 @@ export default function Footer() {
           </h3>
           <ul className="space-y-2 text-sm text-white">
             <li><Link href="/blog" className="hover:text-[#F2A516]">Blog</Link></li>
-            <li><Link href="/krafterslink" className="hover:text-[#F2A516]">KraftersLink</Link></li>
           </ul>
         </div>
 
@@ -101,8 +89,10 @@ export default function Footer() {
           <h3 className="text-[#F2A516] text-sm mb-4 font-normal">
             Be a part of
           </h3>
-          <Link
-            href="/join"
+          <a
+            href="https://www.codekrafters.tech/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="
               inline-block mt-2 px-6 py-3 rounded-xl
               bg-[#F2A516] text-[#0D0D0D] font-normal text-sm
@@ -112,7 +102,7 @@ export default function Footer() {
             "
           >
             Join Our Club
-          </Link>
+          </a>
         </div>
       </div>
 

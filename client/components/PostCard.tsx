@@ -2,7 +2,7 @@
 
 import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Eye, Trash2 } from 'lucide-react';
+import { Heart, Trash2 } from 'lucide-react';
 import { Post } from '@/types/blog';
 
 interface PostCardProps {
@@ -112,9 +112,7 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(
                 /> 
                 <span className="tabular-nums">{post.likes}</span>
               </button>
-              <span className="flex items-center gap-1 group-hover:text-blue-500 transition-colors">
-                <Eye size={14} /> <span className="tabular-nums">{post.views}</span>
-              </span>
+
             </div>
           </div>
         </div>

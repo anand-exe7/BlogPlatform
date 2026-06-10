@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ImageIcon, Upload, Save, Calendar, Tag, User } from 'lucide-react';
 import { NewPost } from '@/lib/types';
@@ -19,6 +20,32 @@ export default function CreateBlogSection({
   handleCreatePost,
   fileInputRef 
 }: CreateBlogSectionProps) {
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const event = {
+        target: {
+          files: e.dataTransfer.files
+        }
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      handleImageUpload(event);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -49,22 +76,23 @@ export default function CreateBlogSection({
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Cover Image</label>
           <div className="flex gap-2">
-            <div className="relative flex-1">
-              <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                value={newPost.coverImage}
-                onChange={(e) => setNewPost({ ...newPost, coverImage: e.target.value })}
-                placeholder="https://example.com/image.jpg"
-                className="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:border-[#f5b800] focus:bg-white transition-all"
-              />
-            </div>
             <button 
+              type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-2xl flex items-center justify-center transition-colors"
-              title="Upload from PC"
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`w-full border-2 border-dashed px-4 py-4 rounded-2xl flex items-center justify-center gap-3 transition-colors ${
+                isDragging 
+                  ? 'bg-amber-50 border-[#f5b800] text-[#f5b800]' 
+                  : 'bg-gray-50 hover:bg-gray-100 border-gray-300 hover:border-[#f5b800] text-gray-700'
+              }`}
+              title="Upload from PC or Drag and Drop"
             >
-              <Upload size={20} />
+              <Upload size={20} className={isDragging ? 'text-[#f5b800]' : 'text-gray-500'} />
+              <span className="font-semibold">
+                {isDragging ? 'Drop Image Here' : 'Upload Cover Image or Drag & Drop'}
+              </span>
             </button>
             <input 
               type="file" 
