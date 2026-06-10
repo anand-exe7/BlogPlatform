@@ -42,8 +42,15 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // Check if we are on a touch device/mobile to handle interactions differently
   useEffect(() => {
+    let ticking = false;
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024 || "ontouchstart" in window);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setIsMobile(window.innerWidth < 1024 || "ontouchstart" in window);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
@@ -109,19 +116,64 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  return (
+  return isMobile ? (
+    <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/80 backdrop-blur-3xl border-t border-white/90 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-around px-2 py-1">
+        {navItems.map((item) => {
+          const isActive = activeSection === item.id || (item.id === "admin" && typeof window !== "undefined" && window.location.pathname.includes("/admin"));
+          return (
+            <motion.button
+              key={item.id}
+              onClick={() => {
+                if (item.id === "admin") {
+                  router.push("/admin/dashboard");
+                } else {
+                  onSectionChange(item.id as Section);
+                }
+              }}
+              whileTap={{ scale: 0.9 }}
+              className="flex flex-col items-center gap-0.5 py-1 px-3"
+            >
+              <div className={`
+                relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300
+                ${isActive ? `${item.color} text-white shadow-lg` : "text-gray-400"}
+              `}>
+                {isActive && <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-br from-white/30 via-transparent to-black/10 pointer-events-none"></div>}
+                <div className={isActive ? "scale-100" : ""}>
+                  {item.icon}
+                </div>
+              </div>
+              <span className={`text-[8px] font-black uppercase tracking-widest transition-colors duration-300 ${isActive ? "text-gray-900" : "text-gray-400"}`}>
+                {item.label}
+              </span>
+            </motion.button>
+          );
+        })}
+        <motion.button
+          onClick={() => (isLoggedIn ? onLogout?.() : onLogin?.())}
+          whileTap={{ scale: 0.9 }}
+          className="flex flex-col items-center gap-0.5 py-1 px-3"
+        >
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${
+            isLoggedIn ? "text-red-400" : "text-gray-400"
+          }`}>
+            {isLoggedIn ? <LogOut size={20} strokeWidth={2.5} /> : <LogIn size={20} strokeWidth={2.5} />}
+          </div>
+          <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">
+            {isLoggedIn ? "Logout" : "Login"}
+          </span>
+        </motion.button>
+      </div>
+    </nav>
+  ) : (
     <aside
       className="fixed left-4 top-1/2 -translate-y-1/2 z-[100]"
-      onMouseEnter={() => !isMobile && setIsWrapped(false)}
-      onMouseLeave={() => !isMobile && setIsWrapped(true)}
+      onMouseEnter={() => setIsWrapped(false)}
+      onMouseLeave={() => setIsWrapped(true)}
     >
       <motion.div
         transition={{ type: "spring", damping: 22, stiffness: 180 }}
         className="flex flex-col items-center bg-white/60 backdrop-blur-3xl border border-white/80 rounded-[3.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] ring-1 ring-black/5 overflow-hidden p-3 sm:p-4"
-        style={{
-          willChange: "transform",
-          transform: "translateZ(0)",
-        }}
       >
         <AnimatePresence mode="popLayout">
           {!isWrapped && (
@@ -132,10 +184,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               exit={{ opacity: 0, height: 0, scale: 0.5 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="flex flex-col items-center gap-5 sm:gap-6 mb-5 sm:mb-6"
-              style={{
-                willChange: "transform, opacity",
-                transform: "translateZ(0)",
-              }}
             >
               {navItems.map((item, index) => (
                 <motion.div
@@ -144,18 +192,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  style={{
-                    willChange: "transform",
-                    transform: "translateZ(0)",
-                  }}
                 >
-                  {/* Tooltip - Only on desktop */}
-                  {!isMobile && (
-                    <div className="absolute left-full ml-6 px-4 py-2 bg-[#101828] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl opacity-0 pointer-events-none translate-x-[-15px] transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl whitespace-nowrap z-50">
-                      {item.label}
-                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-[#101828]"></div>
-                    </div>
-                  )}
+                  <div className="absolute left-full ml-6 px-4 py-2 bg-[#101828] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl opacity-0 pointer-events-none translate-x-[-15px] transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl whitespace-nowrap z-50">
+                    {item.label}
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-[#101828]"></div>
+                  </div>
 
                   <motion.button
                     onClick={() => {
@@ -164,7 +205,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                       } else {
                         onSectionChange(item.id as Section);
                       }
-                      if (isMobile) setIsWrapped(true); // Auto-close on mobile after selection
                     }}
                     whileHover={{ scale: 1.1, y: -2 }}
                     whileTap={{ scale: 0.9 }}
@@ -174,21 +214,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                       ${activeSection === item.id ? "ring-[4px] ring-white/90 scale-105" : "hover:brightness-110"}
                     `}
                     style={{
-                      boxShadow:
-                        activeSection === item.id
-                          ? item.activeShadow
-                          : undefined,
-                      willChange: "transform",
-                      transform: "translateZ(0)",
+                      boxShadow: activeSection === item.id ? item.activeShadow : undefined,
                     }}
                   >
                     <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-br from-white/30 via-transparent to-black/10 pointer-events-none"></div>
                     <div className="absolute inset-[1px] rounded-[inherit] border border-white/20 pointer-events-none"></div>
 
                     <motion.div
-                      animate={
-                        activeSection === item.id ? { scale: [1, 1.1, 1] } : {}
-                      }
+                      animate={activeSection === item.id ? { scale: [1, 1.1, 1] } : {}}
                       transition={{ repeat: Infinity, duration: 2 }}
                       className="scale-90 sm:scale-100"
                     >
@@ -200,11 +233,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         layoutId="activeDot"
                         className="absolute -right-3 top-1/2 -translate-y-1/2 w-1.5 h-6 sm:w-2 sm:h-7 bg-[#101828] rounded-full"
                         initial={false}
-                        transition={{
-                          type: "spring",
-                          stiffness: 400,
-                          damping: 30,
-                        }}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
                       />
                     )}
                   </motion.button>
@@ -217,12 +246,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: navItems.length * 0.05 }}
               >
-                {!isMobile && (
-                  <div className="absolute left-full ml-6 px-4 py-2 bg-[#101828] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl opacity-0 pointer-events-none translate-x-[-15px] transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl whitespace-nowrap z-50">
-                    {isLoggedIn ? "Sign Out" : "Sign In"}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-[#101828]"></div>
-                  </div>
-                )}
+                <div className="absolute left-full ml-6 px-4 py-2 bg-[#101828] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl opacity-0 pointer-events-none translate-x-[-15px] transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 shadow-xl whitespace-nowrap z-50">
+                  {isLoggedIn ? "Sign Out" : "Sign In"}
+                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-[#101828]"></div>
+                </div>
                 <motion.button
                   onClick={() => (isLoggedIn ? onLogout?.() : onLogin?.())}
                   whileHover={{ scale: 1.1, y: -2 }}
@@ -233,60 +260,32 @@ const Sidebar: React.FC<SidebarProps> = ({
                       : "bg-[#f5b800]/20 text-[#f5b800] shadow-[#f5b800]/20 hover:bg-[#f5b800]/30"
                   }`}
                 >
-                  {isLoggedIn ? (
-                    <LogOut size={24} strokeWidth={2.5} />
-                  ) : (
-                    <LogIn size={24} strokeWidth={2.5} />
-                  )}
+                  {isLoggedIn ? <LogOut size={24} strokeWidth={2.5} /> : <LogIn size={24} strokeWidth={2.5} />}
                 </motion.button>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Brand Logo - Interaction Trigger */}
         <motion.div
           onClick={handleLogoClick}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="relative cursor-pointer group"
-          style={{
-            willChange: "transform",
-            transform: "translateZ(0)",
-          }}
         >
-          {/* Subtle indicator hint */}
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-md z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            {isWrapped ? (
-              <ChevronUp size={8} strokeWidth={4} />
-            ) : (
-              <ChevronDown size={8} strokeWidth={4} />
-            )}
+            {isWrapped ? <ChevronUp size={8} strokeWidth={4} /> : <ChevronDown size={8} strokeWidth={4} />}
           </div>
 
           <motion.div
-            animate={{
-              y: isWrapped ? 0 : [0, -2, 0],
-            }}
-            transition={
-              isWrapped
-                ? { duration: 0.3 }
-                : { duration: 4, repeat: Infinity, ease: "easeInOut" }
-            }
+            animate={{ y: isWrapped ? 0 : [0, -2, 0] }}
+            transition={isWrapped ? { duration: 0.3 } : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="w-12 h-12 sm:w-16 sm:h-16 relative flex items-center justify-center"
-            style={{
-              willChange: "transform",
-              transform: "translateZ(0)",
-            }}
           >
-            {/* CK Logo Design */}
             <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
               <rect width="100" height="100" rx="35" fill="#1A1A1A" />
               <path d="M22 36 H40 V44 H30 V56 H40 V64 H22 V36 Z" fill="white" />
-              <path
-                d="M46 36 H54 V48 L64 36 H73 L61 51 L74 64 H65 L54 53 V64 H46 V36 Z"
-                fill="white"
-              />
+              <path d="M46 36 H54 V48 L64 36 H73 L61 51 L74 64 H65 L54 53 V64 H46 V36 Z" fill="white" />
             </svg>
           </motion.div>
 

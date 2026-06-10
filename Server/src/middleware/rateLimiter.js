@@ -4,7 +4,7 @@ import { logger } from '../utils/logger.js';
 
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 500,
   message: { success: false, error: { message: 'Too many requests, please try again later', code: 'RATE_LIMIT' } },
   standardHeaders: true,
   legacyHeaders: false,

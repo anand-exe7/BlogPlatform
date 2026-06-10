@@ -48,6 +48,7 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(
             src={post.image || post.coverImage} 
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
             alt={post.title}
+            loading="lazy"
             onError={(e) => { 
               const target = e.target as HTMLImageElement;
               target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&h=500&fit=crop"; 

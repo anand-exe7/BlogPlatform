@@ -292,6 +292,7 @@ export default function AdminPipelineSection({
                       src={selectedBlog.image || selectedBlog.coverImage}
                       className="w-full h-full object-cover"
                       alt="Cover"
+                      loading="lazy"
                     />
                   </div>
 

@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, LayoutGroup } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { Section, Post, NewPost } from "@/types/blog";
 import Sidebar from "../sidebar";
-import { GrainOverlay, GridPattern } from "../background";
-import BlogDetailModal from "../BlogDetailModal";
+import { GridPattern } from "../background";
 import DashboardSection from "./DashboardSection";
 import { HomeSection, MyBlogsSection } from "./MyBlogsSection";
-import CreateBlogSection from "./CreateBlogSection";
 import SettingsSection from "./SettingsSection";
-import { AuthModal } from "../AuthModal";
+
+const BlogDetailModal = dynamic(() => import("../BlogDetailModal"), { ssr: false });
+const CreateBlogSection = dynamic(() => import("./CreateBlogSection"), { ssr: false });
+const AuthModal = dynamic(() => import("../AuthModal").then(mod => ({ default: mod.AuthModal })), { ssr: false });
 import { useApi, useMutation } from "@/lib/hooks";
 import { blogApi, interactionApi, handleApiError } from "@/lib/api";
 import { useAuth } from "@/lib/useAuth";
@@ -396,7 +398,6 @@ export default function BlogPlatform() {
   if (postsLoading && posts.length === 0) {
     return (
       <div className="min-h-screen bg-[#f8f7f4] font-sans text-gray-900 overflow-x-hidden relative">
-        <GrainOverlay />
         <GridPattern />
         <Sidebar
           activeSection={activeSection}
@@ -424,7 +425,6 @@ export default function BlogPlatform() {
           {error}
         </div>
       )}
-      <GrainOverlay />
       <GridPattern />
       <Sidebar
         activeSection={activeSection}
@@ -442,7 +442,7 @@ export default function BlogPlatform() {
         isSuperAdmin={user?.is_super_admin}
       />
 
-      <main className="relative z-10 min-h-screen w-full flex flex-col items-center pt-20 md:pt-12 pb-12 px-4 md:px-8 lg:pl-32 transition-all duration-300">
+      <main className="relative z-10 min-h-screen w-full flex flex-col items-center pt-20 md:pt-12 pb-24 md:pb-12 px-4 md:px-8 lg:pl-32 transition-all duration-300">
         <AnimatePresence mode="wait">
           {activeSection === "dashboard" && (
             <DashboardSection

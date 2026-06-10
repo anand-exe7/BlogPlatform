@@ -190,6 +190,7 @@ function FeatureCard({ feature, index }: { feature: (typeof FEATURES)[0]; index:
           src={feature.image}
           alt={feature.title}
           className="w-full h-full object-cover"
+          loading="lazy"
         />
         <div className="absolute top-8 right-8 w-16 h-16 bg-[#F2B200] border-[6px] border-[#0B1220] rounded-2xl flex items-center justify-center rotate-12 group-hover:rotate-0 transition-all duration-500 shadow-xl">
           <Icon className="w-8 h-8 text-[#0B1220]" />

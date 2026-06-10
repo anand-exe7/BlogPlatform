@@ -46,10 +46,10 @@ export function useAuth() {
   }, [fetchUser]);
 
   useEffect(() => {
-    let isFirst = true;
+    let lastFetch = Date.now();
     const handleVisible = () => {
-      if (document.visibilityState === 'visible') {
-        if (isFirst) { isFirst = false; return; }
+      if (document.visibilityState === 'visible' && Date.now() - lastFetch > 30000) {
+        lastFetch = Date.now();
         fetchUser();
       }
     };

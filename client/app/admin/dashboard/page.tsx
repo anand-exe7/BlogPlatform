@@ -23,7 +23,7 @@ import {
 import { adminApi, handleApiError, User, Post } from "@/lib/api";
 import { useAuth } from "@/lib/useAuth";
 import Sidebar from "@/components/sidebar";
-import { GrainOverlay, GridPattern } from "@/components/background";
+import { GridPattern } from "@/components/background";
 import SlotCounter from "@/components/SlotCounter";
 import { springTransition } from "@/lib/animations";
 import { AuthModal } from "@/components/AuthModal";
@@ -187,7 +187,6 @@ export default function AdminDashboard() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#f8f7f4] flex flex-col items-center justify-center">
-        <GrainOverlay />
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f5b800] mb-4" />
         <p className="font-black text-gray-500 uppercase tracking-widest text-xs">
           Accessing Control Center...
@@ -203,7 +202,6 @@ export default function AdminDashboard() {
   if (loading && !stats) {
     return (
       <div className="min-h-screen bg-[#f8f7f4] flex flex-col items-center justify-center">
-        <GrainOverlay />
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f5b800] mb-4" />
         <p className="font-black text-gray-500 uppercase tracking-widest text-xs">
           Accessing Control Center...
@@ -215,7 +213,6 @@ export default function AdminDashboard() {
   if (error && !stats) {
     return (
       <div className="min-h-screen bg-[#f8f7f4] flex flex-col items-center justify-center p-6 text-center">
-        <GrainOverlay />
         <div className="bg-white/70 backdrop-blur-xl border border-rose-100 p-12 rounded-[3rem] shadow-xl max-w-lg">
           <XCircle size={64} className="text-rose-500 mx-auto mb-6" />
           <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">
@@ -237,7 +234,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#f8f7f4] font-sans text-gray-900 selection:bg-[#f5b800] selection:text-white overflow-x-hidden relative">
-      <GrainOverlay />
       <GridPattern />
 
       <Sidebar
@@ -253,7 +249,7 @@ export default function AdminDashboard() {
         isSuperAdmin={user?.is_super_admin}
       />
 
-      <main className="relative z-10 min-h-screen w-full flex flex-col items-center pt-20 md:pt-12 pb-12 px-4 md:px-8 lg:pl-32 transition-all duration-300">
+      <main className="relative z-10 min-h-screen w-full flex flex-col items-center pt-20 md:pt-12 pb-24 md:pb-12 px-4 md:px-8 lg:pl-32 transition-all duration-300">
         <div className="w-full max-w-7xl flex flex-col gap-8">
           {/* Hero Section - Admin Style */}
           <div className="relative overflow-hidden rounded-[2.5rem] bg-white/70 backdrop-blur-2xl border border-white/70 shadow-[0_40px_80px_-25px_rgba(0,0,0,0.1)]">
@@ -530,14 +526,14 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto -mx-10 px-10">
-                  <table className="w-full text-left">
+                <div className="overflow-x-auto -mx-4 md:-mx-10 px-4 md:px-10">
+                  <table className="w-full text-left min-w-[500px] md:min-w-0">
                     <thead>
                       <tr className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 border-b border-gray-100">
                         <th className="pb-6 pr-4">Member Info</th>
-                        <th className="pb-6 pr-4">College Context</th>
-                        <th className="pb-6 pr-4">Account State</th>
-                        <th className="pb-6 pr-4">Joined At</th>
+                        <th className="pb-6 pr-4 hidden md:table-cell">College Context</th>
+                        <th className="pb-6 pr-4">Status</th>
+                        <th className="pb-6 pr-4 hidden md:table-cell">Joined</th>
                         <th className="pb-6 text-right">Actions</th>
                       </tr>
                     </thead>
@@ -558,22 +554,22 @@ export default function AdminDashboard() {
                             key={u.id}
                             className="group hover:bg-amber-50/30 transition-colors"
                           >
-                            <td className="py-6 pr-4">
+                            <td className="py-4 md:py-6 pr-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center font-black text-gray-400 group-hover:bg-amber-100 group-hover:text-amber-600 transition-all">
+                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center font-black text-gray-400 group-hover:bg-amber-100 group-hover:text-amber-600 transition-all text-sm md:text-base shrink-0">
                                   {u.name.charAt(0)}
                                 </div>
-                                <div>
-                                  <div className="font-black text-gray-900">
+                                <div className="min-w-0">
+                                  <div className="font-black text-gray-900 text-sm md:text-base truncate">
                                     {u.name}
                                   </div>
-                                  <div className="text-xs text-gray-400 font-bold">
+                                  <div className="text-[10px] md:text-xs text-gray-400 font-bold truncate">
                                     {u.email}
                                   </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="py-6 pr-4">
+                            <td className="py-4 md:py-6 pr-4 hidden md:table-cell">
                               <div className="text-sm font-black text-gray-700">
                                 {u.reg_no}
                               </div>
@@ -581,47 +577,49 @@ export default function AdminDashboard() {
                                 {u.domain} • Year {u.year}
                               </div>
                             </td>
-                            <td className="py-6 pr-4">
+                            <td className="py-4 md:py-6 pr-4">
                               <span
-                                className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                                className={`inline-block px-2 md:px-3 py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${
                                   u.status === "approved"
                                     ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                                    : "bg-amber-50 text-amber-600 border border-amber-100"
+                                    : u.status === "rejected"
+                                      ? "bg-red-50 text-red-600 border border-red-100"
+                                      : "bg-amber-50 text-amber-600 border border-amber-100"
                                 }`}
                               >
-                                {u.status}
+                                {u.status === "pending_review" ? "Review" : u.status}
                               </span>
                             </td>
-                            <td className="py-6 pr-4 text-sm text-gray-500 font-medium">
+                            <td className="py-4 md:py-6 pr-4 text-xs md:text-sm text-gray-500 font-medium hidden md:table-cell">
                               {new Date(
                                 u.created_at || "",
                               ).toLocaleDateString()}
                             </td>
-                            <td className="py-6 text-right">
+                            <td className="py-4 md:py-6 text-right">
                               {u.status === "pending" && (
                                 <button
                                   onClick={() => handleApproveUser(u.id)}
-                                  className="text-amber-600 font-black text-xs hover:underline uppercase tracking-widest"
+                                  className="text-amber-600 font-black text-[10px] md:text-xs hover:underline uppercase tracking-widest whitespace-nowrap"
                                 >
-                                  Approve Now
+                                  Approve
                                 </button>
                               )}
                               {u.status === "approved" && u.role === "member" && (
                                 <button
                                   onClick={() => handlePromoteUser(u.id)}
                                   disabled={actionLoading === u.id}
-                                  className="text-blue-600 font-black text-xs hover:underline uppercase tracking-widest disabled:opacity-50"
+                                  className="text-blue-600 font-black text-[10px] md:text-xs hover:underline uppercase tracking-widest whitespace-nowrap disabled:opacity-50"
                                 >
-                                  {actionLoading === u.id ? "..." : "Promote to Admin"}
+                                  {actionLoading === u.id ? "..." : "Promote"}
                                 </button>
                               )}
                               {u.status === "approved" && u.role === "admin" && !u.is_super_admin && (
                                 <button
                                   onClick={() => handleDemoteUser(u.id)}
                                   disabled={actionLoading === u.id}
-                                  className="text-red-500 font-black text-xs hover:underline uppercase tracking-widest disabled:opacity-50"
+                                  className="text-red-500 font-black text-[10px] md:text-xs hover:underline uppercase tracking-widest whitespace-nowrap disabled:opacity-50"
                                 >
-                                  {actionLoading === u.id ? "..." : "Demote to Member"}
+                                  {actionLoading === u.id ? "..." : "Demote"}
                                 </button>
                               )}
                             </td>

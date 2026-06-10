@@ -172,6 +172,7 @@ export default function BlogDetailModal({ selectedPost, setSelectedPost, onLike,
                 src={selectedPost.image || selectedPost.coverImage} 
                 alt={selectedPost.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             </motion.div>
             <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />

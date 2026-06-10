@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Mail, Lock, GraduationCap, Briefcase, ChevronRight, ArrowLeft, Clock, Settings } from "lucide-react";
 import { authApi, handleApiError } from "@/lib/api";
-import { GrainOverlay, GridPattern } from "@/components/background";
+import { GridPattern } from "@/components/background";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -65,7 +65,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center p-4 relative overflow-hidden">
-      <GrainOverlay />
       <GridPattern />
 
       {/* Back to Home Link */}

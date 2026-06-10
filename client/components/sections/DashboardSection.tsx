@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -8,6 +9,7 @@ import {
   PenLine,
   BookOpen,
   Feather,
+  Users,
 } from "lucide-react";
 import { Post, Section } from "@/types/blog";
 import SlotCounter from "../SlotCounter";
@@ -28,6 +30,26 @@ export default function DashboardSection({
   setActiveSection,
 }: DashboardSectionProps) {
   const { user } = useAuth();
+  const [platformStats, setPlatformStats] = useState({
+    totalUsers: 0,
+    totalPublished: 0,
+    totalWords: 0,
+  });
+
+  useEffect(() => {
+    import("@/lib/api-client").then(({ apiClient }) => {
+      apiClient.get("/stats/platform").then((res) => {
+        const d = res.data?.data;
+        if (d) {
+          setPlatformStats({
+            totalUsers: d.totalUsers ?? 0,
+            totalPublished: d.totalPublished ?? 0,
+            totalWords: d.totalWords ?? 0,
+          });
+        }
+      }).catch(() => {});
+    });
+  }, []);
 
   return (
     <motion.div
@@ -292,11 +314,14 @@ export default function DashboardSection({
         <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-[#f5b800]/10 rounded-full blur-[80px]" />
 
         {[
-          { label: "Active Writers", value: 12543 },
-          { label: "Stories Published", value: 45200 },
-          { label: "Words Written", value: 890000 },
+          { label: "Active Writers", value: platformStats.totalUsers, icon: Users },
+          { label: "Stories Published", value: platformStats.totalPublished, icon: BookOpen },
+          { label: "Words Written", value: platformStats.totalWords, icon: Feather },
         ].map((stat, i) => (
           <div key={i} className="relative z-10 text-center group">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <stat.icon className="w-4 h-4 text-[#f5b800] opacity-60" />
+            </div>
             <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-2 tracking-tight group-hover:scale-110 transition-transform duration-500 flex justify-center">
               <SlotCounter value={stat.value} />
             </div>

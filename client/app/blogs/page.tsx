@@ -3,13 +3,12 @@
 import { motion } from 'framer-motion';
 import { BookOpen, ArrowLeft, PenTool } from 'lucide-react';
 import Link from 'next/link';
-import { GrainOverlay, GridPattern } from '@/components/background';
+import { GridPattern } from '@/components/background';
 import BlogFeed from '@/components/BlogFeed';
 
 export default function BlogsPage() {
   return (
     <div className="min-h-screen bg-[#f8f7f4] font-sans text-gray-900 selection:bg-[#f5b800] selection:text-white overflow-x-hidden relative">
-      <GrainOverlay />
       <GridPattern />
       
       {/* Public Top Nav */}

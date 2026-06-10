@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Clock, ArrowLeft, Globe, ShieldAlert } from "lucide-react";
-import { GrainOverlay, GridPattern } from "@/components/background";
+import { GridPattern } from "@/components/background";
 
 export default function PendingPage() {
   return (
     <div className="min-h-screen bg-[#f8f7f4] font-sans text-gray-900 overflow-hidden relative flex items-center justify-center p-4">
-      <GrainOverlay />
       <GridPattern />
       
       <motion.div 

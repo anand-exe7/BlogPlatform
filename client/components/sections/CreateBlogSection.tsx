@@ -167,6 +167,7 @@ export default function CreateBlogSection({
                 src={newPost.coverImage} 
                 alt="Cover preview" 
                 className="w-full h-full object-cover"
+                loading="lazy"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = "https://images.unsplash.com/photo-1499750789039-ca2a2f92c815?w=800&h=400&fit=crop";

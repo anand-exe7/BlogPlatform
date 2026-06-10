@@ -113,13 +113,22 @@ export async function getUserStats(userId) {
 }
 
 export async function getPlatformStats() {
-  const [totalUsers, totalBlogs, totalPublished, totalLikes, totalComments] = await Promise.all([
+  const [totalUsers, totalBlogs, totalPublished, totalLikes, totalComments, publishedBlogs] = await Promise.all([
     prisma.user.count({ where: { role: "member", status: "approved" } }),
     prisma.blog.count(),
     prisma.blog.count({ where: { status: "published" } }),
     prisma.like.count(),
     prisma.comment.count(),
+    prisma.blog.findMany({
+      where: { status: "published" },
+      select: { content: true },
+    }),
   ]);
 
-  return { totalUsers, totalBlogs, totalPublished, totalLikes, totalComments };
+  const totalWords = publishedBlogs.reduce((sum, blog) => {
+    if (!blog.content) return sum;
+    return sum + blog.content.trim().split(/\s+/).filter(Boolean).length;
+  }, 0);
+
+  return { totalUsers, totalBlogs, totalPublished, totalLikes, totalComments, totalWords };
 }

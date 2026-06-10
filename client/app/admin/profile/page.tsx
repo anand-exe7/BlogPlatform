@@ -23,7 +23,7 @@ import {
 import { authApi, adminApi, handleApiError, User as UserType } from "@/lib/api";
 import { useAuth } from "@/lib/useAuth";
 import Sidebar from "@/components/sidebar";
-import { GrainOverlay, GridPattern } from "@/components/background";
+import { GridPattern } from "@/components/background";
 import SlotCounter from "@/components/SlotCounter";
 import { springTransition } from "@/lib/animations";
 
@@ -98,7 +98,6 @@ export default function AdminProfile() {
   if (loading && !stats) {
     return (
       <div className="min-h-screen bg-[#f8f7f4] flex flex-col items-center justify-center">
-        <GrainOverlay />
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f5b800] mb-4" />
         <p className="font-black text-gray-500 uppercase tracking-widest text-xs">
           Securing session...
@@ -109,7 +108,6 @@ export default function AdminProfile() {
 
   return (
     <div className="min-h-screen bg-[#f8f7f4] font-sans text-gray-900 selection:bg-[#f5b800] selection:text-white overflow-x-hidden relative">
-      <GrainOverlay />
       <GridPattern />
 
       <Sidebar
@@ -121,7 +119,7 @@ export default function AdminProfile() {
         isLoggedIn={isLoggedIn}
       />
 
-      <main className="relative z-10 min-h-screen w-full flex flex-col items-center pt-20 md:pt-12 pb-12 px-4 md:px-8 lg:pl-32 transition-all duration-300">
+      <main className="relative z-10 min-h-screen w-full flex flex-col items-center pt-20 md:pt-12 pb-24 md:pb-12 px-4 md:px-8 lg:pl-32 transition-all duration-300">
         <div className="w-full max-w-7xl flex flex-col gap-8">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
