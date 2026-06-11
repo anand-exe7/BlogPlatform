@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { BookOpen, ArrowLeft, PenTool } from 'lucide-react';
 import Link from 'next/link';
 import { GridPattern } from '@/components/background';
+import { Navbar } from '@/components/landing/navbar';
 import BlogFeed from '@/components/BlogFeed';
 
 export default function BlogsPage() {
@@ -12,33 +13,9 @@ export default function BlogsPage() {
       <GridPattern />
       
       {/* Public Top Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform shrink-0">
-              <BookOpen size={20} />
-            </div>
-            <span className="hidden sm:inline font-black text-xl tracking-tighter uppercase">CodeKrafter</span>
-          </Link>
-          
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            <Link 
-              href="/login" 
-              className="hidden sm:block px-6 py-2.5 rounded-xl font-black text-sm text-gray-500 hover:text-black transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link 
-              href="/login" 
-              className="px-4 sm:px-6 py-2.5 bg-black text-white rounded-xl font-black text-sm shadow-xl hover:shadow-gray-200 transition-all flex items-center gap-2"
-            >
-              <PenTool size={16} /> <span className="whitespace-nowrap">Join Club</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
-      <main className="relative z-10 w-full flex flex-col items-center pt-32 pb-24 px-4 md:px-8">
+      <main className="relative w-full flex flex-col items-center pt-32 pb-24 px-4 md:px-8">
         <div className="w-full max-w-7xl">
           {/* Header Intro */}
           <div className="mb-16 md:mb-24 flex flex-col items-center text-center">
@@ -77,7 +54,7 @@ export default function BlogsPage() {
       </main>
 
       {/* Decorative Footer Detail */}
-      <footer className="relative z-10 py-12 border-t border-gray-100 flex flex-col items-center gap-6">
+      <footer className="relative py-12 border-t border-gray-100 flex flex-col items-center gap-6">
         <div className="flex gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
           <span>Design</span>
           <span>•</span>
@@ -85,7 +62,7 @@ export default function BlogsPage() {
           <span>•</span>
           <span>Code</span>
         </div>
-        <p className="text-xs font-bold text-gray-300">© 2024 CODE KRAFTERS CLUB</p>
+        <p className="text-xs font-bold text-gray-300">© 2026 CODE KRAFTERS CLUB</p>
       </footer>
     </div>
   );

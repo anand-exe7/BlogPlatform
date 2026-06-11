@@ -65,6 +65,7 @@ export function useAuth() {
   const logout = useCallback(() => {
     setUser(null);
     setIsLoggedIn(false);
+    sessionStorage.removeItem('hasVisited');
   }, []);
 
   const refreshUser = useCallback(async () => {

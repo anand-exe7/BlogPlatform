@@ -15,8 +15,16 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500)
-    return () => clearTimeout(timer)
+    const hasVisited = sessionStorage.getItem('hasVisited');
+    if (hasVisited) {
+      setIsLoading(false);
+    } else {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+        sessionStorage.setItem('hasVisited', 'true');
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
   }, [])
 
   if (isLoading) {

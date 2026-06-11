@@ -80,7 +80,7 @@ export default function Footer() {
             Resources
           </h3>
           <ul className="space-y-2 text-sm text-white">
-            <li><Link href="/blog" className="hover:text-[#F2A516]">Blog</Link></li>
+            <li><Link href="/blogs" className="hover:text-[#F2A516]">Blog</Link></li>
           </ul>
         </div>
 
