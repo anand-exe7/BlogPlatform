@@ -230,16 +230,27 @@ export default function BlogPlatform() {
   const totalComments = myPosts.reduce((acc, post) => acc + post.comments, 0);
   const totalViews = myPosts.reduce((acc, post) => acc + post.views, 0);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewPost({ ...newPost, coverImage: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const apiClient = (await import('@/lib/api-client')).default;
+    const res = await apiClient.post('/blogs/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    const url = res.data?.data?.url;
+    if (url) {
+      setNewPost({ ...newPost, coverImage: url });
     }
-  };
+  } catch (err) {
+    console.error('Image upload failed:', err);
+    alert('Failed to upload image');
+  }
+};
 
   const handleCreatePost = async () => {
     if (!newPost.title || !newPost.content) {
