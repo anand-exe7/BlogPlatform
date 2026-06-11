@@ -136,6 +136,15 @@ export const authApi = {
   },
 };
 
+export const uploadImage = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append("image", file);
+  const response = await apiClient.post("/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data?.data?.url || response.data?.url;
+};
+
 export const blogApi = {
   getAllPosts: async (page?: number, limit?: number): Promise<Post[]> => {
     const response = await apiClient.get("/blogs/public", {

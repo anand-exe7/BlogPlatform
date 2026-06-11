@@ -1,25 +1,21 @@
-import { v2 as cloudinary } from 'cloudinary';
-import multerStorageCloudinary from 'multer-storage-cloudinary';
-import multer from 'multer';
+import multer from "multer";
 
-const { CloudinaryStorage } = multerStorageCloudinary;
+const storage = multer.memoryStorage();
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed"), false);
+  }
+};
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'codekrafters-blogs',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 1200, height: 630, crop: 'fill' }],
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
   },
 });
 
-export const uploadImage = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-});
+export default upload;
