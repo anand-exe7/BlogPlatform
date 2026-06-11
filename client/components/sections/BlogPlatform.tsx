@@ -16,7 +16,7 @@ const BlogDetailModal = dynamic(() => import("../BlogDetailModal"), { ssr: false
 const CreateBlogSection = dynamic(() => import("./CreateBlogSection"), { ssr: false });
 const AuthModal = dynamic(() => import("../AuthModal").then(mod => ({ default: mod.AuthModal })), { ssr: false });
 import { useApi, useMutation } from "@/lib/hooks";
-import { blogApi, interactionApi, handleApiError } from "@/lib/api";
+import { blogApi, interactionApi, uploadImage, handleApiError } from "@/lib/api";
 import { useAuth } from "@/lib/useAuth";
 import { useAutoLogin } from "@/lib/useAutoLogin";
 
@@ -230,14 +230,14 @@ export default function BlogPlatform() {
   const totalComments = myPosts.reduce((acc, post) => acc + post.comments, 0);
   const totalViews = myPosts.reduce((acc, post) => acc + post.views, 0);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewPost({ ...newPost, coverImage: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    try {
+      const url = await uploadImage(file);
+      if (url) setNewPost({ ...newPost, coverImage: url });
+    } catch (err) {
+      toast.error("Failed to upload image");
     }
   };
 

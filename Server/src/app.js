@@ -8,6 +8,7 @@ import registerRoutes from "./routes/index.routes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { generalLimiter } from "./middleware/rateLimiter.js";
 import { logger } from "./utils/logger.js";
+import uploadRoute from "./routes/upload.routes.js";
 import "./config/env.js";
 
 dotenv.config();
@@ -20,7 +21,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      imgSrc: ["'self'", "data:", "https:", process.env.R2_PUBLIC_URL].filter(Boolean),
       connectSrc: ["'self'", process.env.FRONTEND_URL || 'http://localhost:3000'],
       fontSrc: ["'self'", "https:"],
       objectSrc: ["'none'"],
@@ -42,6 +43,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(generalLimiter);
+
+app.use("/api", uploadRoute);
 
 app.use((req, res, next) => {
   req.requestId = uuidv4();
